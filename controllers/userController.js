@@ -190,7 +190,13 @@ exports.getMyProfile = catchAsyncError(async (req, res, next) => {
 
 exports.changePassword = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const { password } = req.body
+  const { password,confirmPassword } = req.body
+  if(password!==confirmPassword){
+    return res.status(400).send({
+      success:false,
+      message:"Password not match with Confirm password"
+    })
+  }
   const user = await userModel.findById(id);
   user.password = password
   await user.save();
