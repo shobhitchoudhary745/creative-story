@@ -3,35 +3,54 @@ const notificationsModel = require("../models/notificationsModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
-const sendData = async (user, statusCode, res,purpose) => {
+const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
   const newUser = {
     firstName: user.name,
-    lastName:user.lastname,
+    lastName: user.lastname,
     email: user.email,
     mobile_no: user.mobile_no,
     gender: user.gender,
     isEmailVerfied: user.isEmailVerfied,
     _id: user._id,
-    userName:user.userName
+    userName: user.userName,
   };
-  if(purpose){
+  if (purpose) {
     res.status(statusCode).json({
-      status:"otp send successfully"
+      status: "otp send successfully",
     });
-  }
-  else{
+  } else {
     res.status(statusCode).json({
       user: newUser,
       token,
-      status:"user login successfully"
+      status: "user login successfully",
     });
   }
-  
 };
 
 exports.register = catchAsyncError(async (req, res, next) => {
-  const { firstName, lastName, userName, email, password, mobile_no, gender } = req.body;
+  const { firstName, lastName, userName, email, password, mobile_no, gender } =
+    req.body;
+  const validGenders = ["Male", "Female", "Other"];
+  if (!validGenders.includes(gender)) {
+    return next(
+      new ErrorHandler("Invalid Gender value. Use 'Male,Female,Other' instead.", 400)
+    );
+  }
+  if (firstName.length <= 3) {
+    return next(
+      new ErrorHandler("first name must be of atleast 4 character", 400)
+    );
+  }
+  if (lastName.length <= 3) {
+    return next(
+      new ErrorHandler("last name must be of atleast 4 character", 400)
+    );
+  }
+  const existingUser = await userModel.findOne({ userName });
+  if (existingUser) {
+    return next(new ErrorHandler("This username is already exist", 400));
+  }
   const min = 1000;
   const max = 9999;
   const otp = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -43,7 +62,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     mobile_no,
     gender,
     otp,
-    userName
+    userName,
   });
   const owner = user._id;
   await notificationsModel.create({
@@ -55,7 +74,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
   await sendEmail(options);
-  sendData(user, 201, res,"register");
+  sendData(user, 201, res, "register");
 });
 
 exports.login = catchAsyncError(async (req, res, next) => {
@@ -65,14 +84,16 @@ exports.login = catchAsyncError(async (req, res, next) => {
 
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) {
-    console.log("first");
+    
     return next(new ErrorHandler("Invalid email or password", 401));
   }
 
   const isPasswordMatched = await user.comparePassword(password);
   if (!isPasswordMatched)
     return next(new ErrorHandler("Invalid email or password!", 401));
-
+  if(!user.isEmailVerfied){
+    return next(new ErrorHandler("Verify Your Email before login.", 400));
+  }
   sendData(user, 200, res);
 });
 
@@ -180,6 +201,9 @@ exports.submitOtpForEmailVerification = catchAsyncError(
 exports.getMyProfile = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
   const user = await userModel.findById(id);
+  if (!user) {
+    return next(new ErrorHandler("Invalid token", 400));
+  }
   res.status(200).send({
     status: "success",
     user_data: {
@@ -190,15 +214,15 @@ exports.getMyProfile = catchAsyncError(async (req, res, next) => {
 
 exports.changePassword = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const { password,confirmPassword } = req.body
-  if(password!==confirmPassword){
+  const { password, confirmPassword } = req.body;
+  if (password !== confirmPassword) {
     return res.status(400).send({
-      success:false,
-      message:"Password not match with Confirm password"
-    })
+      success: false,
+      message: "Password not match with Confirm password",
+    });
   }
   const user = await userModel.findById(id);
-  user.password = password
+  user.password = password;
   await user.save();
   res.status(202).send({
     status: "Password changed successfully",
@@ -207,15 +231,12 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
 
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const { gender, mobile_no } = req.body
+  const { gender, mobile_no } = req.body;
   const user = await userModel.findById(id);
-  if(gender)
-  user.gender = gender
-  if(mobile_no)
-  user.mobile_no = mobile_no
+  if (gender) user.gender = gender;
+  if (mobile_no) user.mobile_no = mobile_no;
   await user.save();
   res.status(202).send({
     status: "Profile updated successfully",
   });
 });
-

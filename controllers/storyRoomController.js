@@ -35,11 +35,11 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
 });
 
 exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
-  const { userId, roomId } = req.body;
+  const { userId, roomId, isAccept } = req.body;
   const roomDetails = await storyRoomModel.findById(roomId);
   roomDetails.participants.map((data) => {
     if (data._id == userId) {
-      data.invitationAccepted = true;
+      data.invitationAccepted = isAccept;
     }
   });
   await roomDetails.save();
@@ -52,33 +52,55 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.getRooms = catchAsyncError(async (req, res, next) => {
-  const { status } = req.query;
-  console.log(status);
-  if(1+1===2)
-  res.status(200).send();
-  else{
-    let userId = req.userId;
-    const rooms = await storyRoomModel.find({
-      $or: [
-        { admin: userId },
-        {
-          "participants": {
-            $elemMatch: {
-              _id: userId,
-              invitationAccepted: false
-            }
-          }
-        }   
-      ],
-      status
-    });
-    
-    res.status(200).send({
-      status:200,
-      length:rooms.length,
-      data:rooms
-    });
-  }
- 
+exports.getMyStories = catchAsyncError(async (req, res, next) => {
+  let userId = req.userId;
+  const rooms = await storyRoomModel.find({
+    $or: [
+      { admin: userId },
+      {
+        participants: {
+          $elemMatch: {
+            _id: userId,
+            invitationAccepted: true,
+          },
+        },
+      },
+    ],
+  });
+
+  res.status(200).send({
+    status: 200,
+    length: rooms.length,
+    my_stories: rooms,
+  });
+});
+
+exports.getActiveStories = catchAsyncError(async (req, res, next) => {
+  let userId = req.userId;
+  const rooms = await storyRoomModel.find({
+    $and: [
+      {
+        $or: [
+          { admin: userId },
+          {
+            participants: {
+              $elemMatch: {
+                _id: userId,
+                invitationAccepted: true,
+              },
+            },
+          },
+        ],
+      },
+      {
+        status: "active",
+      },
+    ],
+  });
+
+  res.status(200).send({
+    status: 200,
+    length: rooms.length,
+    active_stories: rooms,
+  });
 });
