@@ -92,7 +92,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
   if (!isPasswordMatched)
     return next(new ErrorHandler("Invalid email or password!", 401));
   if(!user.isEmailVerfied){
-    return next(new ErrorHandler("Verify Your Email before login.", 400));
+    return next(new ErrorHandler("Verify Your Email before login.", 403));
   }
   sendData(user, 200, res);
 });
