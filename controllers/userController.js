@@ -6,8 +6,8 @@ const sendEmail = require("../utils/email");
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
   const newUser = {
-    firstName: user.name,
-    lastName: user.lastname,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     mobile_no: user.mobile_no,
     gender: user.gender,
