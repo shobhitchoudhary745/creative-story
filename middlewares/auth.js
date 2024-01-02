@@ -11,6 +11,7 @@ exports.auth = async (req, res, next) => {
         },
       });
     }
+    // console.log(req.headers.authorization)
     const { userId } = jwt.verify(
       req.headers.authorization.split(" ")[1],
       process.env.JWT_SECRET

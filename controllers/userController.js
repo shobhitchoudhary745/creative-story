@@ -231,10 +231,12 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
 
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const { gender, mobile_no } = req.body;
+  const { gender, mobile_no,firstName,lastName } = req.body;
   const user = await userModel.findById(id);
   if (gender) user.gender = gender;
   if (mobile_no) user.mobile_no = mobile_no;
+  if(firstName) user.firstName = firstName;
+  if(lastName) user.lastName = lastName;
   await user.save();
   res.status(202).send({
     status: "Profile updated successfully",

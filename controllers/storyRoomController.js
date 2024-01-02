@@ -54,24 +54,39 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
 
 exports.getMyStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
-  const rooms = await storyRoomModel.find({
-    $or: [
-      { admin: userId },
-      {
-        participants: {
-          $elemMatch: {
-            _id: userId,
-            invitationAccepted: true,
-          },
-        },
-      },
-    ],
-  });
+  // console.log(userId);
+  const rooms = await storyRoomModel.find();
+  const arr = []
+  // const admin = rooms.filter(data=>data.adminId==userId);
+  for(let data of rooms){
+    if(data.admin==userId){
+      arr.push(data);
+      continue;
+    }
+    for(let participant of data.participants){
+      if(participant._id==userId&&participant.invitationAccepted){
+        arr.push(data);
+        break;
+      }
+    }
+  }
+  //   $or: [
+  //     { admin: userId },
+  //     {
+  //       participants: {
+  //         $elemMatch: {
+  //           _id: userId,
+  //           invitationAccepted: true,
+  //         },
+  //       },
+  //     },
+  //   ],
+  // });
 
   res.status(200).send({
     status: 200,
-    length: rooms.length,
-    my_stories: rooms,
+    length: arr.length,
+    my_stories: arr,
   });
 });
 
