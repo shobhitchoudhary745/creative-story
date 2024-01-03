@@ -3,6 +3,7 @@ const notificationsModel = require("../models/notificationsModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
+const { s3Uploadv2, deleteFile } = require("../utils/s3");
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
   const newUser = {
@@ -14,6 +15,7 @@ const sendData = async (user, statusCode, res, purpose) => {
     isEmailVerfied: user.isEmailVerfied,
     _id: user._id,
     userName: user.userName,
+    profileUrl:user.profileUrl
   };
   if (purpose) {
     res.status(statusCode).json({
@@ -231,14 +233,29 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
 
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const { gender, mobile_no,firstName,lastName } = req.body;
+  const { gender, mobile_no,firstName,lastName,profileUrl } = req.body;
   const user = await userModel.findById(id);
   if (gender) user.gender = gender;
   if (mobile_no) user.mobile_no = mobile_no;
   if(firstName) user.firstName = firstName;
   if(lastName) user.lastName = lastName;
+  if(profileUrl) user.profileUrl = profileUrl;
   await user.save();
   res.status(202).send({
     status: "Profile updated successfully",
   });
+});
+
+exports.uploadProfile = catchAsyncError(async (req, res, next) => {
+  const file = req.file;
+  if (!file) return next(new ErrorHandler("Invalid Image", 401));
+  const results = await s3Uploadv2(file);
+  const location = results.Location && results.Location;
+  return res.status(201).json({ data: { location } });
+});
+
+exports.deleteProfile = catchAsyncError(async (req, res, next) => {
+  const url = req.body.url
+  deleteFile(url,res);
+  // return res.status(201).json({ data });
 });

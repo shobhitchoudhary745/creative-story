@@ -36,6 +36,9 @@ const userSchema = new mongoose.Schema(
       minLength: [4, "Name should have more that 4 characters"],
       unique:true
     },
+    profileUrl:{
+      type:String
+    },
     mobile_no: {
       type: String,
       required: [true, "Mobile number is required."],
