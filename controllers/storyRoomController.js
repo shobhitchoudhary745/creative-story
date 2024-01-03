@@ -56,15 +56,15 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
   // console.log(userId);
   const rooms = await storyRoomModel.find();
-  const arr = []
+  const arr = [];
   // const admin = rooms.filter(data=>data.adminId==userId);
-  for(let data of rooms){
-    if(data.admin==userId){
+  for (let data of rooms) {
+    if (data.admin == userId) {
       arr.push(data);
       continue;
     }
-    for(let participant of data.participants){
-      if(participant._id==userId&&participant.invitationAccepted){
+    for (let participant of data.participants) {
+      if (participant._id == userId && participant.invitationAccepted) {
         arr.push(data);
         break;
       }
@@ -117,5 +117,115 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
     status: 200,
     length: rooms.length,
     active_stories: rooms,
+  });
+});
+
+exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
+  let userId = req.userId;
+  const rooms = await storyRoomModel.find({
+    $and: [
+      {
+        $or: [
+          { admin: userId },
+          {
+            participants: {
+              $elemMatch: {
+                _id: userId,
+                invitationAccepted: true,
+              },
+            },
+          },
+        ],
+      },
+      {
+        status: "upcoming",
+      },
+    ],
+  });
+
+  res.status(200).send({
+    status: 200,
+    length: rooms.length,
+    upcoming_stories: rooms,
+  });
+});
+
+exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
+  let userId = req.userId;
+  const rooms = await storyRoomModel.find({
+    $and: [
+      {
+        $or: [
+          { admin: userId },
+          {
+            participants: {
+              $elemMatch: {
+                _id: userId,
+                invitationAccepted: true,
+              },
+            },
+          },
+        ],
+      },
+      {
+        status: "completed",
+      },
+    ],
+  });
+
+  res.status(200).send({
+    status: 200,
+    length: rooms.length,
+    completed_stories: rooms,
+  });
+});
+
+exports.startStory = catchAsyncError(async (req, res, next) => {
+  let { roomId } = req.params;
+  const room = await storyRoomModel.findById(roomId);
+
+  if (!room) {
+    res.status(400).json({ message: "Story not found" });
+  }
+
+  if (roomId != req.userId) {
+    res.status(403).json({ message: "You do not have access" });
+  }
+
+  if (room.status === "completed" || room.status === "active") {
+    res.status(402).json({ message: "Story already completed/ongoing" });
+  }
+
+  room.status = "active";
+  await room.save();
+
+  res.status(200).json({
+    status: 200,
+    message: "story started",
+  });
+});
+
+exports.endStory = catchAsyncError(async (req, res, next) => {
+  let { roomId } = req.params;
+  const room = await storyRoomModel.findById(roomId);
+
+  if (!room) {
+    res.status(400).json({ message: "Story not found" });
+  }
+
+  if (roomId != req.userId) {
+    res.status(403).json({ message: "You do not have access" });
+  }
+
+  if (room.status === "upcoming" || room.status === "completed") {
+    res.status(402).json({ message: "Story not started yet/completed" });
+  }
+
+  room.status = "completed";
+  await room.save();
+
+  res.status(200).json({
+    status: 200,
+    message: "story completed",
   });
 });
