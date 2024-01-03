@@ -248,14 +248,15 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
 
 exports.uploadProfile = catchAsyncError(async (req, res, next) => {
   const file = req.file;
+  const userId = req.userId;
   if (!file) return next(new ErrorHandler("Invalid Image", 401));
-  const results = await s3Uploadv2(file);
+  const results = await s3Uploadv2(file,userId);
   const location = results.Location && results.Location;
   return res.status(201).json({ data: { location } });
 });
 
 exports.deleteProfile = catchAsyncError(async (req, res, next) => {
   const url = req.body.url
-  deleteFile(url,res);
+  deleteFile(url,res,req.userId);
   // return res.status(201).json({ data });
 });

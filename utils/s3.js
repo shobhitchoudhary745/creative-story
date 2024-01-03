@@ -1,7 +1,7 @@
 const S3 = require("aws-sdk/clients/s3");
 const multer = require("multer");
 
-exports.s3Uploadv2 = async (file) => {
+exports.s3Uploadv2 = async (file,userId) => {
   const s3 = new S3({
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRET_KEY,
@@ -10,14 +10,14 @@ exports.s3Uploadv2 = async (file) => {
 
   const param = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `uploads/${Date.now().toString()}-${file.originalname}`,
+    Key: `uploads/${userId}`,
     Body: file.buffer,
   };
 
   return await s3.upload(param).promise();
 };
 
-exports.deleteFile = async (url, res) => {
+exports.deleteFile = async (url, res,userId) => {
   const key = url.split(".com/")[1];
   const s3 = new S3({
     accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -27,7 +27,7 @@ exports.deleteFile = async (url, res) => {
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: key,
+    Key: `uploads/${userId}`,
   };
 
   try {

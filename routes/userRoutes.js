@@ -27,7 +27,7 @@ router.post("/submitOtpForEmailVerification", submitOtpForEmailVerification);
 router.get("/my_profile", auth, getMyProfile);
 router.patch("/change_password", auth, changePassword);
 router.patch("/update_profile", auth, updateProfile);
-router.post("/uploadProfile", upload.single("image"),uploadProfile);
-router.post("/deleteProfile",deleteProfile);
+router.post("/uploadProfile", auth, upload.single("image"), uploadProfile);
+router.post("/deleteProfile", auth, deleteProfile);
 
 module.exports = router;
