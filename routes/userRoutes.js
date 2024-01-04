@@ -29,6 +29,6 @@ router.get("/my_profile", auth, getMyProfile);
 router.patch("/change_password", auth, changePassword);
 router.patch("/update_profile", auth,upload.single("image"), updateProfile);
 // router.post("/uploadProfile", auth, upload.single("image"), uploadProfile);
-router.post("/deleteProfile", auth, deleteProfile);
+// router.post("/deleteProfile", auth, deleteProfile);
 router.get("/getAllUsers",auth,getAllUser);
 module.exports = router;

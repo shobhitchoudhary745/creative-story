@@ -101,7 +101,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
 
 exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const user = await userModel.findByIdAndDelete(id);
+  const user = await userModel.findByIdAndDelete(id).lean();
   if (user) {
     res.status(202).send({
       status: 202,
@@ -202,7 +202,7 @@ exports.submitOtpForEmailVerification = catchAsyncError(
 
 exports.getMyProfile = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const user = await userModel.findById(id);
+  const user = await userModel.findById(id).lean();
   if (!user) {
     return next(new ErrorHandler("Invalid token", 400));
   }
@@ -261,11 +261,11 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
 //   return res.status(201).json({ data: { location } });
 // });
 
-exports.deleteProfile = catchAsyncError(async (req, res, next) => {
-  const url = req.body.url
-  deleteFile(url,res,req.userId);
-  // return res.status(201).json({ data });
-});
+// exports.deleteProfile = catchAsyncError(async (req, res, next) => {
+//   const url = req.body.url
+//   deleteFile(url,res,req.userId);
+//   // return res.status(201).json({ data });
+// });
 
 exports.getAllUser = catchAsyncError(async (req, res, next) => {
   const users = await userModel.find({ _id: { $ne: req.userId } }).lean();

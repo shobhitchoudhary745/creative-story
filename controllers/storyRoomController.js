@@ -11,7 +11,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     admin: req.userId,
     participants,
     numberOfRounds,
-  });
+  }).lean();
   res.status(201).send({
     status: 201,
     success: true,
