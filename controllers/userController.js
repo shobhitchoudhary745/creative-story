@@ -233,27 +233,33 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
 
 exports.updateProfile = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
-  const { gender, mobile_no,firstName,lastName,profileUrl } = req.body;
+  const file = req.file;
+  let location;
+  if(file){
+    const results = await s3Uploadv2(file);
+    location = results.Location && results.Location;
+  }
+  const { gender, mobile_no,firstName,lastName } = req.body;
   const user = await userModel.findById(id);
   if (gender) user.gender = gender;
   if (mobile_no) user.mobile_no = mobile_no;
   if(firstName) user.firstName = firstName;
   if(lastName) user.lastName = lastName;
-  if(profileUrl) user.profileUrl = profileUrl;
+  if(location) user.profileUrl = location;
   await user.save();
   res.status(202).send({
     status: "Profile updated successfully",
   });
 });
 
-exports.uploadProfile = catchAsyncError(async (req, res, next) => {
-  const file = req.file;
-  const userId = req.userId;
-  if (!file) return next(new ErrorHandler("Invalid Image", 401));
-  const results = await s3Uploadv2(file,userId);
-  const location = results.Location && results.Location;
-  return res.status(201).json({ data: { location } });
-});
+// exports.uploadProfile = catchAsyncError(async (req, res, next) => {
+//   const file = req.file;
+//   const userId = req.userId;
+//   if (!file) return next(new ErrorHandler("Invalid Image", 401));
+//   const results = await s3Uploadv2(file,userId);
+//   const location = results.Location && results.Location;
+//   return res.status(201).json({ data: { location } });
+// });
 
 exports.deleteProfile = catchAsyncError(async (req, res, next) => {
   const url = req.body.url
