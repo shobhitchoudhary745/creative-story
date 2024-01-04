@@ -187,13 +187,13 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   if (!room) {
     res.status(400).json({ message: "Story not found" });
   }
-
-  if (roomId != req.userId) {
+  console.log(room.admin," ", req.userId);
+  if (room.admin != req.userId) {
     res.status(403).json({ message: "You do not have access" });
   }
 
   if (room.status === "completed" || room.status === "active") {
-    res.status(402).json({ message: "Story already completed/ongoing" });
+    res.status(401).json({ message: "Story already completed/ongoing" });
   }
 
   room.status = "active";
@@ -213,12 +213,12 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
     res.status(400).json({ message: "Story not found" });
   }
 
-  if (roomId != req.userId) {
+  if (room.admin != req.userId) {
     res.status(403).json({ message: "You do not have access" });
   }
 
   if (room.status === "upcoming" || room.status === "completed") {
-    res.status(402).json({ message: "Story not started yet/completed" });
+    res.status(401).json({ message: "Story not started yet/completed" });
   }
 
   room.status = "completed";
