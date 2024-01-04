@@ -1,7 +1,7 @@
 const S3 = require("aws-sdk/clients/s3");
 const multer = require("multer");
 
-exports.s3Uploadv2 = async (file,userId) => {
+exports.s3Uploadv2 = async (file) => {
   const s3 = new S3({
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRET_KEY,
@@ -10,7 +10,7 @@ exports.s3Uploadv2 = async (file,userId) => {
 
   const param = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `uploads/${userId}`,
+    Key: `uploads/${Date.now().toString()}-${file.originalname}`,
     Body: file.buffer,
   };
 

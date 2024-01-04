@@ -13,6 +13,7 @@ const {
   updateProfile,
   uploadProfile,
   deleteProfile,
+  getAllUser,
 } = require("../controllers/userController");
 const sendEmail = require("../utils/email");
 const { upload } = require("../utils/s3");
@@ -29,5 +30,5 @@ router.patch("/change_password", auth, changePassword);
 router.patch("/update_profile", auth, updateProfile);
 router.post("/uploadProfile", auth, upload.single("image"), uploadProfile);
 router.post("/deleteProfile", auth, deleteProfile);
-
+router.get("/getAllUsers",auth,getAllUser);
 module.exports = router;

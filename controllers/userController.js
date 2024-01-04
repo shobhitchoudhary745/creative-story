@@ -260,3 +260,12 @@ exports.deleteProfile = catchAsyncError(async (req, res, next) => {
   deleteFile(url,res,req.userId);
   // return res.status(201).json({ data });
 });
+
+exports.getAllUser = catchAsyncError(async (req, res, next) => {
+  const users = await userModel.find({ _id: { $ne: req.userId } }).lean();
+  res.status(200).send({
+    success:true,
+    length:users.length,
+    users
+  });
+});
