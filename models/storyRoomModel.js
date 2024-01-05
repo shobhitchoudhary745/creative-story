@@ -14,7 +14,7 @@ const storyRoomSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please Enter Description"],
     },
-    admin: {
+    host: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },

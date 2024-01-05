@@ -1,5 +1,5 @@
 const catchAsyncError = require("../utils/catchAsyncError");
-
+const storyRoomModel = require("../models/storyRoomModel");
 exports.termsandcondition = catchAsyncError(async (req, res, next) => {
   const termsBody = ` 
   <h1>Terms and Conditions</h1>
@@ -37,7 +37,7 @@ exports.termsandcondition = catchAsyncError(async (req, res, next) => {
 });
 
 exports.privacypolicy = catchAsyncError(async (req, res, next) => {
-    const termsBody = `<h1>Privacy Policy</h1>
+  const termsBody = `<h1>Privacy Policy</h1>
     <p>At our website, we respect and protect the privacy of our users. This Privacy Policy outlines the types of personal information that is received and collected and how it is used.</p>
     
     <h2>1. Information Collection</h2>
@@ -68,6 +68,15 @@ exports.privacypolicy = catchAsyncError(async (req, res, next) => {
 
     <p>This is just a sample of a privacy policy. Please replace this content with your own privacy policy.</p>
   `;
-    res.set("Content-Type", "text/html");
-    res.status(200).send(termsBody);
-  });
+  res.set("Content-Type", "text/html");
+  res.status(200).send(termsBody);
+});
+
+exports.getAllStoryRoom = catchAsyncError(async (req, res, next) => {
+  const rooms = storyRoomModel.find().lean();
+  res.status(200).send({
+    success:true,
+    length:(await rooms).length,
+    data:rooms
+  })
+});

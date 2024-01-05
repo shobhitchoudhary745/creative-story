@@ -4,14 +4,15 @@ const catchAsyncError = require("../utils/catchAsyncError");
 exports.createRoom = catchAsyncError(async (req, res, next) => {
   const { roomName, theme, description, participants, numberOfRounds } =
     req.body;
-  const room = await storyRoomModel.create({
-    roomName,
-    theme,
-    description,
-    admin: req.userId,
-    participants,
-    numberOfRounds,
-  }).lean();
+  const room = await storyRoomModel
+    .create({
+      roomName,
+      theme,
+      description,
+      host: req.userId,
+      participants,
+      numberOfRounds,
+    });
   res.status(201).send({
     status: 201,
     success: true,
@@ -24,8 +25,8 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
   const { roomId } = req.params;
   const roomDetails = await storyRoomModel
     .findById(roomId)
-    .populate("admin", "name email")
-    .populate("participants._id", "name email");
+    .populate("host", "name email")
+    .populate("participants._id", "name email").lean();
   res.status(200).send({
     status: 200,
     success: true,
@@ -55,16 +56,19 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
 exports.getMyStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
   // console.log(userId);
-  const rooms = await storyRoomModel.find();
+  const rooms = await storyRoomModel.find().lean();
   const arr = [];
   // const admin = rooms.filter(data=>data.adminId==userId);
   for (let data of rooms) {
-    if (data.admin == userId) {
+    console.log(userId)
+    if (data.host == userId) {
+      data.host = true;
       arr.push(data);
       continue;
     }
     for (let participant of data.participants) {
       if (participant._id == userId && participant.invitationAccepted) {
+        data.host = false;
         arr.push(data);
         break;
       }
@@ -96,7 +100,7 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
     $and: [
       {
         $or: [
-          { admin: userId },
+          { host: userId },
           {
             participants: {
               $elemMatch: {
@@ -111,7 +115,14 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
         status: "active",
       },
     ],
-  });
+  }).lean();
+  for (let data of rooms) {
+    if (data.host == userId) {
+      data.host = true;
+    } else {
+      data.host = false;
+    }
+  }
 
   res.status(200).send({
     status: 200,
@@ -126,7 +137,7 @@ exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
     $and: [
       {
         $or: [
-          { admin: userId },
+          { host: userId },
           {
             participants: {
               $elemMatch: {
@@ -141,7 +152,14 @@ exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
         status: "upcoming",
       },
     ],
-  });
+  }).lean();
+  for (let data of rooms) {
+    if (data.host == userId) {
+      data.host = true;
+    } else {
+      data.host = false;
+    }
+  }
 
   res.status(200).send({
     status: 200,
@@ -156,7 +174,7 @@ exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
     $and: [
       {
         $or: [
-          { admin: userId },
+          { host: userId },
           {
             participants: {
               $elemMatch: {
@@ -171,7 +189,15 @@ exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
         status: "completed",
       },
     ],
-  });
+  }).lean();
+
+  for (let data of rooms) {
+    if (data.host == userId) {
+      data.host = true;
+    } else {
+      data.host = false;
+    }
+  }
 
   res.status(200).send({
     status: 200,
@@ -187,8 +213,8 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   if (!room) {
     res.status(400).json({ message: "Story not found" });
   }
-  console.log(room.admin," ", req.userId);
-  if (room.admin != req.userId) {
+  console.log(room.host, " ", req.userId);
+  if (room.host != req.userId) {
     res.status(403).json({ message: "You do not have access" });
   }
 
@@ -213,7 +239,7 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
     res.status(400).json({ message: "Story not found" });
   }
 
-  if (room.admin != req.userId) {
+  if (room.host != req.userId) {
     res.status(403).json({ message: "You do not have access" });
   }
 
