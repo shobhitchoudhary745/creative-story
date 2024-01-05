@@ -31,8 +31,9 @@ const sendData = async (user, statusCode, res, purpose) => {
 };
 
 exports.register = catchAsyncError(async (req, res, next) => {
-  const { firstName, lastName, userName, email, password, mobile_no, gender } =
+  const { firstName, lastName, userName, email, password, mobile,country_code, gender } =
     req.body;
+  const mobile_no = country_code.trim()+" "+mobile.trim();
   const validGenders = ["Male", "Female", "Other"];
   if (!validGenders.includes(gender)) {
     return next(
@@ -53,6 +54,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
   if (existingUser) {
     return next(new ErrorHandler("This username is already exist", 400));
   }
+  
   const min = 1000;
   const max = 9999;
   const otp = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -206,6 +208,8 @@ exports.getMyProfile = catchAsyncError(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler("Invalid token", 400));
   }
+  user.country_code = user.mobile_no.split(" ")[0];
+  user.mobile_no = user.mobile_no.split(" ")[1];
   res.status(200).send({
     status: "success",
     user_data: {
