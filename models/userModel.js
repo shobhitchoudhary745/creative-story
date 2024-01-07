@@ -37,7 +37,8 @@ const userSchema = new mongoose.Schema(
       unique:true
     },
     profileUrl:{
-      type:String
+      type:String,
+      default:"https://tse4.mm.bing.net/th?id=OIP.eXWcaYbEtO2uuexHM8sAwwHaHa&pid=Api&P=0&h=180"
     },
     mobile_no: {
       type: String,

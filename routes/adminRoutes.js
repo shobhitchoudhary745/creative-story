@@ -1,11 +1,27 @@
 const express = require("express");
-const { termsandcondition, privacypolicy, getAllStoryRoom } = require("../controllers/adminController");
-const { isAdmin } = require("../middlewares/auth");
+const {
+  termsandcondition,
+  privacypolicy,
+  getAllStoryRoom,
+  adminLogin,
+  getDashboardData,
+  getAllUser,
+  getUser,
+  updateUser,
+  deleteUser,
+  updateAdminProfile,
+} = require("../controllers/adminController");
+const { isAdmin, auth } = require("../middlewares/auth");
 const router = express.Router();
-
 
 router.get("/terms_and_conditions", termsandcondition);
 router.get("/privacy_policy", privacypolicy);
-router.get("/getAllStoryRooms", isAdmin ,getAllStoryRoom );
-
-module.exports = router
+router.get("/getAllStoryRooms", auth, isAdmin, getAllStoryRoom);
+router.post("/login", adminLogin);
+router.get("/getDashboardData", auth, isAdmin, getDashboardData);
+router.get("/getAllUsers", auth, isAdmin, getAllUser);
+router.get("/getUser/:id", auth, isAdmin, getUser);
+router.put("/updateUser/:id", auth, isAdmin, updateUser);
+router.delete("/deleteUser/:id", auth, isAdmin, deleteUser);
+router.patch("/updateAdminProfile", auth, isAdmin, updateAdminProfile);
+module.exports = router;

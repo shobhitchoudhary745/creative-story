@@ -1,5 +1,9 @@
 const catchAsyncError = require("../utils/catchAsyncError");
 const storyRoomModel = require("../models/storyRoomModel");
+const userModel = require("../models/userModel");
+const genreModel = require("../models/genreModel");
+const ErrorHandler = require("../utils/errorHandler");
+
 exports.termsandcondition = catchAsyncError(async (req, res, next) => {
   const termsBody = ` 
   <h1>Terms and Conditions</h1>
@@ -75,8 +79,140 @@ exports.privacypolicy = catchAsyncError(async (req, res, next) => {
 exports.getAllStoryRoom = catchAsyncError(async (req, res, next) => {
   const rooms = storyRoomModel.find().lean();
   res.status(200).send({
-    success:true,
-    length:(await rooms).length,
-    data:rooms
-  })
+    success: true,
+    length: (await rooms).length,
+    data: rooms,
+  });
+});
+
+exports.adminLogin = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+  const admin = await userModel.findOne({ email }).select("+password");
+  if (!admin) {
+    return next(new ErrorHandler("Invalid credentials", 401));
+  }
+  if (admin.type != "Admin") {
+    return next(new ErrorHandler("You Do not have access to this route", 429));
+  }
+
+  const isMatch = admin.comparePassword(password);
+  if (!isMatch) {
+    return next(new ErrorHandler("Invalid credentials", 401));
+  }
+  const token = await admin.getJWTToken();
+  res.status(200).send({
+    success: true,
+    user: admin,
+    token,
+  });
+});
+
+exports.updateAdminProfile = catchAsyncError(async (req, res, next) => {
+  const { firstName, lastName, mobile_no } = req.body;
+  const admin = await userModel.findById(req.userId);
+  if (!admin) {
+    return next(new ErrorHandler("Invalid credentials", 401));
+  }
+  if (firstName) admin.firstName = firstName;
+  if (lastName) admin.lastName = lastName;
+  if (mobile_no) admin.mobile_no = mobile_no;
+  await admin.save();
+
+  res.status(200).send({
+    success: true,
+    message: "Profile updated Successfully",
+    user:admin
+  });
+});
+
+exports.getDashboardData = catchAsyncError(async (req, res, next) => {
+  const userCount = await userModel.countDocuments();
+  const storyCount = await storyRoomModel.find({});
+  const genreCount = await genreModel.countDocuments();
+  let activeStories = 0,
+    upcomingStories = 0,
+    completedStories = 0;
+  for (let i of storyCount) {
+    if (i.status === "active") {
+      activeStories += 1;
+    } else if (i.status === "upcoming") {
+      upcomingStories += 1;
+    } else {
+      completedStories += 1;
+    }
+  }
+  res.status(200).send({
+    success: true,
+    data: [
+      { key: "Users", value: userCount },
+      { key: "Stories", value: storyCount.length },
+      { key: "Genres", value: genreCount },
+      { key: "Active Stories", value: activeStories },
+      { key: "Upcoming Stories", value: upcomingStories },
+      { key: "Completed Stories", value: completedStories },
+    ],
+  });
+});
+
+exports.getAllUser = catchAsyncError(async (req, res, next) => {
+  const userCount = (await userModel.countDocuments()) - 1;
+  const { currentPage, resultPerPage } = req.query;
+  const skip = resultPerPage * (currentPage - 1);
+  const users = await userModel
+    .find({ _id: { $ne: req.userId } })
+    .limit(resultPerPage)
+    .skip(skip)
+    .lean();
+  res.status(200).send({
+    success: true,
+    length: userCount,
+    users,
+  });
+});
+
+exports.getUser = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const user = await userModel.findById(id).lean();
+  if (!user) {
+    return next(new Error("user not found", 400));
+  }
+  res.status(200).send({
+    success: true,
+    user,
+  });
+});
+
+exports.updateUser = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const { firstName, lastName, mobile, countryCode } = req.body;
+  const user = await userModel.findById(id);
+
+  if (!user) {
+    return next(new Error("user not found", 400));
+  }
+  let userCountryCode = user.mobile_no.split(" ")[0];
+  let userMobile = user.mobile_no.split(" ")[1];
+  if (firstName) user.firstName = firstName;
+  if (lastName) user.lastName = lastName;
+  if (mobile) userMobile = mobile;
+  if (countryCode) userCountryCode = countryCode;
+
+  user.mobile_no = userCountryCode + " " + userMobile;
+
+  await user.save();
+
+  res.status(200).send({
+    success: true,
+    user,
+  });
+});
+
+exports.deleteUser = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const user = await userModel.findByIdAndDelete(id);
+
+  res.status(200).send({
+    success: true,
+    message: "User Deleted Successfully!",
+  });
 });

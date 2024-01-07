@@ -17,6 +17,7 @@ exports.auth = async (req, res, next) => {
       process.env.JWT_SECRET
     );
     req.userId = userId;
+    // console.log(userId)
     next();
   } catch (error) {
     return res.status(401).send({ error: { message: `Unauthorized` } });
@@ -27,11 +28,10 @@ exports.isAdmin = async (req, res, next) => {
   try {
     const userId = req.userId;
     const user = await userModel.findById(userId).select("+password");
-
     if (!user)
       return next(new ErrorHandler("Invalid token. User not found.", 401));
 
-    if (user.role !== "admin")
+    if (user.type !== "Admin")
       return next(new ErrorHandler("Restricted.", 401));
 
     req.user = user;
