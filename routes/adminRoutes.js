@@ -14,6 +14,8 @@ const {
   updateStory,
   deleteStory,
   createPrivacyPolicy,
+  updatePrivacyPolicy,
+  updateTermsAndCondition,
 } = require("../controllers/adminController");
 const { isAdmin, auth } = require("../middlewares/auth");
 const router = express.Router();
@@ -31,5 +33,7 @@ router.patch("/updateAdminProfile", auth, isAdmin, updateAdminProfile);
 router.get("/getStory/:id", auth, isAdmin, getStory);
 router.put("/updateStory/:id", auth, isAdmin, updateStory);
 router.delete("/deleteStory/:id", auth, isAdmin, deleteStory);
+router.put("/updatePrivacyPolicy", auth, isAdmin, updatePrivacyPolicy);
+router.put("/updateTermsAndCondition", auth, isAdmin, updateTermsAndCondition);
 
 module.exports = router;

@@ -213,4 +213,26 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
+exports.updatePrivacyPolicy = catchAsyncError(async (req, res, next) => {
+  const { content } = req.body;
+  const privacyPolicy = await privacypolicyModel.find();
+  privacyPolicy[0].content = content;
+  await privacyPolicy[0].save();
+  res.status(200).send({
+    success: true,
+    message: "Privacy Policy Content Updated Successfully!",
+    privacyPolicy
+  });
+});
 
+exports.updateTermsAndCondition = catchAsyncError(async (req, res, next) => {
+  const { content } = req.body;
+  const termsAndCondition = await termsAndConditionModel.find();
+  termsAndCondition[0].content = content;
+  await termsAndCondition[0].save();
+  res.status(200).send({
+    success: true,
+    message: "Privacy Policy Content Updated Successfully!",
+    termsAndCondition
+  });
+});
