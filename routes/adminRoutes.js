@@ -13,6 +13,7 @@ const {
   getStory,
   updateStory,
   deleteStory,
+  createPrivacyPolicy,
 } = require("../controllers/adminController");
 const { isAdmin, auth } = require("../middlewares/auth");
 const router = express.Router();
