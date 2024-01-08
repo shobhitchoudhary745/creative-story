@@ -153,14 +153,37 @@ exports.getOtpToForgotPassword = catchAsyncError(async (req, res, next) => {
 });
 
 exports.submitOtpToForgotPassword = catchAsyncError(async (req, res, next) => {
-  const { email, otp, password } = req.body;
+  const { email, otp } = req.body;
   const user = await userModel.findOne({
     email,
     otp,
   });
   if (user) {
-    user.password = password;
+    // user.password = password;
     user.otp = 0;
+    await user.save();
+    res.status(202).send({
+      status: 202,
+      success: true,
+      message: "Otp Verify Successfully!",
+    });
+  } else {
+    res.status(400).send({
+      status: 400,
+      success: false,
+      message: "Invalid otp!",
+    });
+  }
+});
+
+exports.resetPassword = catchAsyncError(async (req, res, next) => {
+  const { email,password } = req.body;
+  const user = await userModel.findOne({
+    email
+  });
+  if (user && user.otp==0) {
+    user.password = password;
+    // user.otp = 0;
     await user.save();
     res.status(202).send({
       status: 202,

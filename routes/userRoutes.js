@@ -14,6 +14,7 @@ const {
   uploadProfile,
   deleteProfile,
   getAllUser,
+  resetPassword,
 } = require("../controllers/userController");
 const sendEmail = require("../utils/email");
 const { upload } = require("../utils/s3");
@@ -27,8 +28,9 @@ router.post("/submitOtpToForgotPassword", submitOtpToForgotPassword);
 router.post("/submitOtpForEmailVerification", submitOtpForEmailVerification);
 router.get("/my_profile", auth, getMyProfile);
 router.patch("/change_password", auth, changePassword);
-router.patch("/update_profile", auth,upload.single("image"), updateProfile);
+router.patch("/update_profile", auth, upload.single("image"), updateProfile);
 // router.post("/uploadProfile", auth, upload.single("image"), uploadProfile);
 // router.post("/deleteProfile", auth, deleteProfile);
-router.get("/getAllUsers",auth,getAllUser);
+router.get("/getAllUsers", auth, getAllUser);
+router.patch("/reset_password", resetPassword);
 module.exports = router;

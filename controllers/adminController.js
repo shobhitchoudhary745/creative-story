@@ -77,11 +77,57 @@ exports.privacypolicy = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getAllStoryRoom = catchAsyncError(async (req, res, next) => {
-  const rooms = storyRoomModel.find().lean();
+  const storyCount = await storyRoomModel.countDocuments()
+  const { currentPage, resultPerPage } = req.query;
+  const skip = resultPerPage * (currentPage - 1);
+  const rooms = await storyRoomModel.find().populate({path:"host",select:["firstName","lastName"]}).limit(resultPerPage).skip(skip).lean();
   res.status(200).send({
     success: true,
-    length: (await rooms).length,
-    data: rooms,
+    length: storyCount,
+    stories: rooms,
+  });
+});
+
+exports.getStory = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const story = await storyRoomModel.findById(id).populate({path:"host",select:["firstName","lastName"]}).lean();
+  if (!story) {
+    return next(new Error("Story not found", 400));
+  }
+  res.status(200).send({
+    success: true,
+    story,
+  });
+});
+
+exports.updateStory = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const { roomName, theme, status, description } = req.body;
+  const story = await storyRoomModel.findById(id);
+
+  if (!story) {
+    return next(new Error("user not found", 400));
+  }
+  if (roomName) story.roomName = roomName;
+  if (theme) story.theme = theme;
+  if (status) story.status = status;
+  if (description) story.description = description;
+
+  await story.save();
+
+  res.status(200).send({
+    success: true,
+    story,
+  });
+});
+
+exports.deleteStory = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const story = await storyRoomModel.findByIdAndDelete(id);
+
+  res.status(200).send({
+    success: true,
+    message: "Story Deleted Successfully!",
   });
 });
 

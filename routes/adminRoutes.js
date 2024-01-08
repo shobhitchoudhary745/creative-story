@@ -10,6 +10,9 @@ const {
   updateUser,
   deleteUser,
   updateAdminProfile,
+  getStory,
+  updateStory,
+  deleteStory,
 } = require("../controllers/adminController");
 const { isAdmin, auth } = require("../middlewares/auth");
 const router = express.Router();
@@ -24,4 +27,8 @@ router.get("/getUser/:id", auth, isAdmin, getUser);
 router.put("/updateUser/:id", auth, isAdmin, updateUser);
 router.delete("/deleteUser/:id", auth, isAdmin, deleteUser);
 router.patch("/updateAdminProfile", auth, isAdmin, updateAdminProfile);
+router.get("/getStory/:id", auth, isAdmin, getStory);
+router.put("/updateStory/:id", auth, isAdmin, updateStory);
+router.delete("/deleteStory/:id", auth, isAdmin, deleteStory);
+
 module.exports = router;
