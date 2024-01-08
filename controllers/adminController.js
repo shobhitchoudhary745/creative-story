@@ -2,7 +2,7 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const storyRoomModel = require("../models/storyRoomModel");
 const userModel = require("../models/userModel");
 const genreModel = require("../models/genreModel");
-const privacypolicyModel = require("../models/privacypolicyModel");
+const privacypolicyModel = require("../models/privacyPolicyModel");
 const termsAndConditionModel = require("../models/termsAndConditionModel");
 const ErrorHandler = require("../utils/errorHandler");
 
