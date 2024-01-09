@@ -101,7 +101,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
   sendData(user, 200, res);
 });
 
-exports.deleteUser = catchAsyncError(async (req, res, next) => {
+exports.deleteUser = catchAsyncError(async (req, res, next) => { 
   const id = req.userId;
   const user = await userModel.findByIdAndDelete(id).lean();
   if (user) {
