@@ -16,6 +16,10 @@ const {
   createPrivacyPolicy,
   updatePrivacyPolicy,
   updateTermsAndCondition,
+  getAllGenre,
+  deleteGenre,
+  getGenre,
+  updateGenre,
 } = require("../controllers/adminController");
 const { isAdmin, auth } = require("../middlewares/auth");
 const router = express.Router();
@@ -35,5 +39,9 @@ router.put("/updateStory/:id", auth, isAdmin, updateStory);
 router.delete("/deleteStory/:id", auth, isAdmin, deleteStory);
 router.put("/updatePrivacyPolicy", auth, isAdmin, updatePrivacyPolicy);
 router.put("/updateTermsAndCondition", auth, isAdmin, updateTermsAndCondition);
+router.get("/getAllGenres", auth, isAdmin, getAllGenre);
+router.delete("/deleteGenre/:id", auth, isAdmin, deleteGenre);
+router.get("/getGenre/:id", auth, isAdmin, getGenre);
+router.put("/updateGenre/:id", auth, isAdmin, updateGenre);
 
 module.exports = router;

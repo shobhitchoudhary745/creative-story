@@ -236,3 +236,63 @@ exports.updateTermsAndCondition = catchAsyncError(async (req, res, next) => {
     termsAndCondition
   });
 });
+
+exports.getAllGenre = catchAsyncError(async (req, res, next) => {
+  const genreCount = (await genreModel.countDocuments());
+  const { currentPage, resultPerPage } = req.query;
+  const skip = resultPerPage * (currentPage - 1);
+  const genres = await genreModel
+    .find({ _id: { $ne: req.userId } })
+    .limit(resultPerPage)
+    .skip(skip)
+    .lean();
+  res.status(200).send({
+    success: true,
+    length: genreCount,
+    genres,
+  });
+});
+
+exports.deleteGenre = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const genre = await genreModel.findByIdAndDelete(id);
+
+  res.status(200).send({
+    success: true,
+    message: "Genre Deleted Successfully!",
+  });
+});
+
+exports.getGenre = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const genre = await genreModel.findById(id).lean();
+  if (!genre) {
+    return next(new Error("user not found", 400));
+  }
+  res.status(200).send({
+    success: true,
+    genre,
+  });
+});
+
+exports.updateGenre = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+  const { genre, starter1, starter2, starter3 } = req.body;
+  const genres = await genreModel.findById(id);
+
+  if (!genres) {
+    return next(new Error("user not found", 400));
+  }
+  
+  if (genre) genres.genre = genre;
+  if (starter1) genres.starter[0] = starter1;
+  if (starter2) genres.starter[1] = starter2;
+  if (starter3) genres.starter[2] = starter3;
+
+  await genres.save();
+
+  res.status(200).send({
+    success: true,
+    genres,
+  });
+});
