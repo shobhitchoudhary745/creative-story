@@ -73,7 +73,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     owner,
   });
   const options = {
-    email,
+    email:email.toLowerCase(),
     subject: "Email Verification",
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
