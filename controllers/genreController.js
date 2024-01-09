@@ -11,16 +11,18 @@ exports.createGenre = catchAsyncError(async (req, res, next) => {
     res.status(201).send({
       status: 201,
       success: true,
-      data: genres,
+      genres,
       message: "Genre Created Successfully",
     });
   });
 
   exports.getAllGenre = catchAsyncError(async (req, res, next) => {
+    const genresCount = await genreModel.countDocuments();
     const genres = await genreModel.find().lean();
     res.status(200).send({
-      status: 201,
+      status: 200,
       success: true,
+      length:genresCount,
       data: genres,
     });
   });
