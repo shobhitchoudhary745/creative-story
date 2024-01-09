@@ -15,6 +15,7 @@ const {
   deleteProfile,
   getAllUser,
   resetPassword,
+  resendOtp,
 } = require("../controllers/userController");
 const sendEmail = require("../utils/email");
 const { upload } = require("../utils/s3");
@@ -33,4 +34,5 @@ router.patch("/update_profile", auth, upload.single("image"), updateProfile);
 // router.post("/deleteProfile", auth, deleteProfile);
 router.get("/getAllUsers", auth, getAllUser);
 router.patch("/reset_password", resetPassword);
+router.post("/resendOtp", resendOtp);
 module.exports = router;

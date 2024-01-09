@@ -305,3 +305,30 @@ exports.getAllUser = catchAsyncError(async (req, res, next) => {
     users
   });
 });
+
+exports.resendOtp = catchAsyncError(async (req, res, next) => {
+  const {email} = req.body;
+  const user = await userModel.findOne({email});
+  if(!user){
+    return next(new ErrorHandler("User not Found","400"));
+  }
+  if(user.isEmailVerfied){
+    return next(new ErrorHandler("Email already verified","400"));
+  }
+  
+  const min = 1000;
+  const max = 9999;
+  const otp = Math.floor(Math.random() * (max - min + 1)) + min;
+  user.otp = otp;
+  await user.save();
+  const options = {
+    email,
+    subject: "Email Verification",
+    html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
+  };
+  await sendEmail(options);
+  res.status(200).send({
+    success:"true",
+    message:"otp resend successfully"
+  })
+});
