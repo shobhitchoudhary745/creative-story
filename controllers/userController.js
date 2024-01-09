@@ -130,7 +130,7 @@ exports.getOtpToForgotPassword = catchAsyncError(async (req, res, next) => {
   const otp = Math.floor(Math.random() * (max - min + 1)) + min;
 
   const options = {
-    email,
+    email:email.toLowerCase(),
     subject: "Forgot Password Request",
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
@@ -322,7 +322,7 @@ exports.resendOtp = catchAsyncError(async (req, res, next) => {
   user.otp = otp;
   await user.save();
   const options = {
-    email,
+    email:email.toLowerCase(),
     subject: "Email Verification",
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
