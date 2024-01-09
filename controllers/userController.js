@@ -322,7 +322,7 @@ exports.resendOtp = catchAsyncError(async (req, res, next) => {
   user.otp = otp;
   await user.save();
   const options = {
-    email:email.toLowerCase(),
+    email:email.toLowerCase(), 
     subject: "Email Verification",
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
