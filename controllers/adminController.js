@@ -21,11 +21,17 @@ exports.privacypolicy = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getAllStoryRoom = catchAsyncError(async (req, res, next) => {
-  const storyCount = await storyRoomModel.countDocuments();
-  const { currentPage, resultPerPage } = req.query;
+  
+  const { currentPage, resultPerPage, key } = req.query;
+  let query = {};
+  if (key && key.trim() != 0) {
+    // query.username = { $regex: key, $options: 'i' };
+    query.roomName = { $regex: key, $options: "i" };
+  }
   const skip = resultPerPage * (currentPage - 1);
+  const storyCount = await storyRoomModel.countDocuments(query);
   const rooms = await storyRoomModel
-    .find()
+    .find(query)
     .populate({ path: "host", select: ["firstName", "lastName"] })
     .limit(resultPerPage)
     .skip(skip)
@@ -153,14 +159,22 @@ exports.getDashboardData = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getAllUser = catchAsyncError(async (req, res, next) => {
-  const userCount = (await userModel.countDocuments()) - 1;
-  const { currentPage, resultPerPage } = req.query;
+  const { currentPage, resultPerPage, key } = req.query;
+  let query = { _id: { $ne: req.userId } };
+  if (key && key.trim() !== "") {
+    query.$or = [
+      { firstName: { $regex: key, $options: "i" } },
+      { lastName: { $regex: key, $options: "i" } },
+    ];
+  }
+  const userCount = await userModel.countDocuments(query);
   const skip = resultPerPage * (currentPage - 1);
   const users = await userModel
-    .find({ _id: { $ne: req.userId } })
+    .find(query)
     .limit(resultPerPage)
     .skip(skip)
     .lean();
+
   res.status(200).send({
     success: true,
     length: userCount,
@@ -208,7 +222,7 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
 exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
   await notificationsModel.findByIdAndDelete(id);
-  await storyRoomModel.deleteMany({host:id});
+  await storyRoomModel.deleteMany({ host: id });
   const user = await userModel.findByIdAndDelete(id);
 
   res.status(200).send({
@@ -225,7 +239,7 @@ exports.updatePrivacyPolicy = catchAsyncError(async (req, res, next) => {
   res.status(200).send({
     success: true,
     message: "Privacy Policy Content Updated Successfully!",
-    privacyPolicy
+    privacyPolicy,
   });
 });
 
@@ -237,16 +251,21 @@ exports.updateTermsAndCondition = catchAsyncError(async (req, res, next) => {
   res.status(200).send({
     success: true,
     message: "Privacy Policy Content Updated Successfully!",
-    termsAndCondition
+    termsAndCondition,
   });
 });
 
 exports.getAllGenre = catchAsyncError(async (req, res, next) => {
-  const genreCount = (await genreModel.countDocuments());
-  const { currentPage, resultPerPage } = req.query;
+  
+  const { currentPage, resultPerPage, key } = req.query;
+  let query = {};
+  if (key && key.trim() != 0) {
+    query.genre = { $regex: key, $options: "i" };
+  }
   const skip = resultPerPage * (currentPage - 1);
+  const genreCount = (await genreModel.countDocuments(query));
   const genres = await genreModel
-    .find({ _id: { $ne: req.userId } })
+    .find(query)
     .limit(resultPerPage)
     .skip(skip)
     .lean();
@@ -287,7 +306,7 @@ exports.updateGenre = catchAsyncError(async (req, res, next) => {
   if (!genres) {
     return next(new Error("user not found", 400));
   }
-  
+
   if (genre) genres.genre = genre;
   if (starter1) genres.starter[0] = starter1;
   if (starter2) genres.starter[1] = starter2;

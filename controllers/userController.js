@@ -59,13 +59,8 @@ exports.register = catchAsyncError(async (req, res, next) => {
       )
     );
   }
-  if(!mobile){
-    return next(
-      new ErrorHandler(
-        "Mobile no is required",
-        400
-      )
-    );
+  if (!mobile) {
+    return next(new ErrorHandler("Mobile no is required", 400));
   }
   if (firstName.length <= 3) {
     return next(
@@ -297,10 +292,16 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
     const results = await s3Uploadv2(file);
     location = results.Location && results.Location;
   }
-  const { gender, mobile_no, firstName, lastName, avatar } = req.body;
+  const { gender, mobile, firstName, lastName, avatar, country_code } =
+    req.body;
+
   const user = await userModel.findById(id);
+  let countrycode = user.mobile_no.split(" ")[0];
+  let mobilenumber = user.mobile_no.split(" ")[1];
   if (gender) user.gender = gender;
-  if (mobile_no) user.mobile_no = mobile_no;
+  if (mobile) mobilenumber = mobile;
+  if (country_code) countrycode = country_code;
+  user.mobile_no = countrycode + " " + mobilenumber;
   if (firstName) user.firstName = firstName;
   if (lastName) user.lastName = lastName;
   if (location) user.profileUrl = location;
