@@ -17,7 +17,7 @@ const sendData = async (user, statusCode, res, purpose) => {
     isEmailVerfied: user.isEmailVerfied,
     _id: user._id,
     userName: user.userName,
-    profileUrl:user.profileUrl
+    profileUrl: user.profileUrl,
   };
   if (purpose) {
     res.status(statusCode).json({
@@ -33,13 +33,38 @@ const sendData = async (user, statusCode, res, purpose) => {
 };
 
 exports.register = catchAsyncError(async (req, res, next) => {
-  const { firstName, lastName, userName, email, password, mobile,country_code, gender } =
-    req.body;
-  const mobile_no = country_code.trim()+" "+mobile.trim();
+  const {
+    firstName,
+    lastName,
+    userName,
+    email,
+    password,
+    mobile,
+    country_code,
+    gender,
+  } = req.body;
+  let mobile_no = "+1 ";
+  if (country_code && country_code.trim()) {
+    mobile_no = country_code + " " + mobile;
+  } else {
+    mobile_no = mobile_no + mobile;
+  }
+
   const validGenders = ["Male", "Female", "Other"];
   if (!validGenders.includes(gender)) {
     return next(
-      new ErrorHandler("Invalid Gender value. Use 'Male,Female,Other' instead.", 400)
+      new ErrorHandler(
+        "Invalid Gender value. Use 'Male,Female,Other' instead.",
+        400
+      )
+    );
+  }
+  if(!mobile){
+    return next(
+      new ErrorHandler(
+        "Mobile no is required",
+        400
+      )
     );
   }
   if (firstName.length <= 3) {
@@ -56,7 +81,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
   if (existingUser) {
     return next(new ErrorHandler("This username is already exist", 400));
   }
-  
+
   const min = 1000;
   const max = 9999;
   const otp = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -75,7 +100,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     owner,
   });
   const options = {
-    email:email.toLowerCase(),
+    email: email.toLowerCase(),
     subject: "Email Verification",
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
@@ -90,23 +115,22 @@ exports.login = catchAsyncError(async (req, res, next) => {
 
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) {
-    
     return next(new ErrorHandler("Invalid email or password", 401));
   }
 
   const isPasswordMatched = await user.comparePassword(password);
   if (!isPasswordMatched)
     return next(new ErrorHandler("Invalid email or password!", 401));
-  if(!user.isEmailVerfied){
+  if (!user.isEmailVerfied) {
     return next(new ErrorHandler("Verify Your Email before login.", 403));
   }
   sendData(user, 200, res);
 });
 
-exports.deleteUser = catchAsyncError(async (req, res, next) => { 
+exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
   await notificationsModel.findByIdAndDelete(id);
-  await storyRoomModel.deleteMany({host:id});
+  await storyRoomModel.deleteMany({ host: id });
   const user = await userModel.findByIdAndDelete(id).lean();
   if (user) {
     res.status(202).send({
@@ -134,7 +158,7 @@ exports.getOtpToForgotPassword = catchAsyncError(async (req, res, next) => {
   const otp = Math.floor(Math.random() * (max - min + 1)) + min;
 
   const options = {
-    email:email.toLowerCase(),
+    email: email.toLowerCase(),
     subject: "Forgot Password Request",
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
@@ -181,12 +205,14 @@ exports.submitOtpToForgotPassword = catchAsyncError(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsyncError(async (req, res, next) => {
-  const { email,password } = req.body;
-  const user = await userModel.findOne({
-    email
-  }).select("+password");
+  const { email, password } = req.body;
+  const user = await userModel
+    .findOne({
+      email,
+    })
+    .select("+password");
   console.log(user);
-  if (user && user.otp==0) {
+  if (user && user.otp == 0) {
     user.password = password;
     // user.otp = 0;
     await user.save();
@@ -267,19 +293,19 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
   const file = req.file;
   let location;
-  if(file){
+  if (file) {
     const results = await s3Uploadv2(file);
     location = results.Location && results.Location;
   }
-  const { gender, mobile_no,firstName,lastName,avatar } = req.body;
+  const { gender, mobile_no, firstName, lastName, avatar } = req.body;
   const user = await userModel.findById(id);
   if (gender) user.gender = gender;
   if (mobile_no) user.mobile_no = mobile_no;
-  if(firstName) user.firstName = firstName;
-  if(lastName) user.lastName = lastName;
-  if(location) user.profileUrl = location;
-  if(avatar) user.profileUrl = avatar;
-  
+  if (firstName) user.firstName = firstName;
+  if (lastName) user.lastName = lastName;
+  if (location) user.profileUrl = location;
+  if (avatar) user.profileUrl = avatar;
+
   await user.save();
   res.status(202).send({
     status: "Profile updated successfully",
@@ -304,35 +330,35 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
 exports.getAllUser = catchAsyncError(async (req, res, next) => {
   const users = await userModel.find({ _id: { $ne: req.userId } }).lean();
   res.status(200).send({
-    success:true,
-    length:users.length,
-    users
+    success: true,
+    length: users.length,
+    users,
   });
 });
 
 exports.resendOtp = catchAsyncError(async (req, res, next) => {
-  const {email} = req.body;
-  const user = await userModel.findOne({email});
-  if(!user){
-    return next(new ErrorHandler("User not Found","400"));
+  const { email } = req.body;
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    return next(new ErrorHandler("User not Found", "400"));
   }
-  if(user.isEmailVerfied){
-    return next(new ErrorHandler("Email already verified","400"));
+  if (user.isEmailVerfied) {
+    return next(new ErrorHandler("Email already verified", "400"));
   }
-  
+
   const min = 1000;
   const max = 9999;
   const otp = Math.floor(Math.random() * (max - min + 1)) + min;
   user.otp = otp;
   await user.save();
   const options = {
-    email:email.toLowerCase(), 
+    email: email.toLowerCase(),
     subject: "Email Verification",
     html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
   };
   await sendEmail(options);
   res.status(200).send({
-    success:"true",
-    message:"otp resend successfully"
-  })
+    success: "true",
+    message: "otp resend successfully",
+  });
 });
