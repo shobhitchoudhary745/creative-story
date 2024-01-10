@@ -4,6 +4,8 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const sendEmail = require("../utils/email");
 const { s3Uploadv2, deleteFile } = require("../utils/s3");
+const storyRoomModel = require("../models/storyRoomModel");
+
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
   const newUser = {
@@ -103,6 +105,8 @@ exports.login = catchAsyncError(async (req, res, next) => {
 
 exports.deleteUser = catchAsyncError(async (req, res, next) => { 
   const id = req.userId;
+  await notificationsModel.findByIdAndDelete(id);
+  await storyRoomModel.deleteMany({host:id});
   const user = await userModel.findByIdAndDelete(id).lean();
   if (user) {
     res.status(202).send({

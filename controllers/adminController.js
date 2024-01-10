@@ -2,9 +2,11 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const storyRoomModel = require("../models/storyRoomModel");
 const userModel = require("../models/userModel");
 const genreModel = require("../models/genreModel");
+const motificationModel = require("../models/notificationsModel");
 const privacypolicyModel = require("../models/privacyPolicyModel");
 const termsAndConditionModel = require("../models/termsAndConditionModel");
 const ErrorHandler = require("../utils/errorHandler");
+const notificationsModel = require("../models/notificationsModel");
 
 exports.termsandcondition = catchAsyncError(async (req, res, next) => {
   const termsBody = await termsAndConditionModel.find().lean();
@@ -205,6 +207,8 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
 
 exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
+  await notificationsModel.findByIdAndDelete(id);
+  await storyRoomModel.deleteMany({host:id});
   const user = await userModel.findByIdAndDelete(id);
 
   res.status(200).send({
