@@ -206,7 +206,7 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
       email,
     })
     .select("+password");
-  console.log(user);
+  // console.log(user);
   if (user && user.otp == 0) {
     user.password = password;
     // user.otp = 0;

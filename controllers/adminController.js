@@ -108,7 +108,7 @@ exports.adminLogin = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("You Do not have access to this route", 429));
   }
 
-  const isMatch = admin.comparePassword(password);
+  const isMatch = await admin.comparePassword(password);
   if (!isMatch) {
     return next(new ErrorHandler("Invalid credentials", 401));
   }
