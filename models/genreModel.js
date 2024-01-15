@@ -8,8 +8,12 @@ const genreSchema = new mongoose.Schema(
     },
     starter:[{
         type:String
-    }]
+    }],
+    colour:{
+      type:String
+    }
   },
+  
   { timestamps: true }
 );
 

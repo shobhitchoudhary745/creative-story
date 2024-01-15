@@ -2,11 +2,12 @@ const genreModel = require("../models/genreModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 
 exports.createGenre = catchAsyncError(async (req, res, next) => {
-    const { genre,starter } =
+    const { genre,starter,colour } =
       req.body;
     const genres = await genreModel.create({
       genre,
-      starter
+      starter,
+      colour
     });
     res.status(201).send({
       status: 201,

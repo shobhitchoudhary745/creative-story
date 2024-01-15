@@ -326,7 +326,7 @@ exports.getGenre = catchAsyncError(async (req, res, next) => {
 
 exports.updateGenre = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
-  const { genre, starter1, starter2, starter3 } = req.body;
+  const { genre, starter1, starter2, starter3,colour } = req.body;
   const genres = await genreModel.findById(id);
 
   if (!genres) {
@@ -337,7 +337,7 @@ exports.updateGenre = catchAsyncError(async (req, res, next) => {
   if (starter1) genres.starter[0] = starter1;
   if (starter2) genres.starter[1] = starter2;
   if (starter3) genres.starter[2] = starter3;
-
+  if(colour) genres.colour = colour;
   await genres.save();
 
   res.status(200).send({
