@@ -80,9 +80,7 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 };
 
 userSchema.methods.getJWTToken = function () {
-  return jwt.sign({ userId: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_TOKEN_EXPIRE,
-  });
+  return jwt.sign({ userId: this._id }, process.env.JWT_SECRET);
 };
 
 module.exports = mongoose.model("User", userSchema);
