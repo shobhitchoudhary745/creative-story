@@ -1,18 +1,18 @@
 const storyRoomModel = require("../models/storyRoomModel");
 const catchAsyncError = require("../utils/catchAsyncError");
+const ErrorHandler = require("../utils/errorHandler");
 
 exports.createRoom = catchAsyncError(async (req, res, next) => {
   const { roomName, theme, description, participants, numberOfRounds } =
     req.body;
-  const room = await storyRoomModel
-    .create({
-      roomName,
-      theme,
-      description,
-      host: req.userId,
-      participants,
-      numberOfRounds,
-    });
+  const room = await storyRoomModel.create({
+    roomName,
+    theme,
+    description,
+    host: req.userId,
+    participants,
+    numberOfRounds,
+  });
   res.status(201).send({
     status: 201,
     success: true,
@@ -26,7 +26,8 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
   const roomDetails = await storyRoomModel
     .findById(roomId)
     .populate("host", "name email")
-    .populate("participants._id", "name email").lean();
+    .populate("participants._id", "name email")
+    .lean();
   res.status(200).send({
     status: 200,
     success: true,
@@ -60,7 +61,7 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
   const arr = [];
   // const admin = rooms.filter(data=>data.adminId==userId);
   for (let data of rooms) {
-    console.log(userId)
+    console.log(userId);
     if (data.host == userId) {
       data.host = true;
       arr.push(data);
@@ -96,26 +97,28 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
 
 exports.getActiveStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
-  const rooms = await storyRoomModel.find({
-    $and: [
-      {
-        $or: [
-          { host: userId },
-          {
-            participants: {
-              $elemMatch: {
-                _id: userId,
-                invitationAccepted: true,
+  const rooms = await storyRoomModel
+    .find({
+      $and: [
+        {
+          $or: [
+            { host: userId },
+            {
+              participants: {
+                $elemMatch: {
+                  _id: userId,
+                  invitationAccepted: true,
+                },
               },
             },
-          },
-        ],
-      },
-      {
-        status: "active",
-      },
-    ],
-  }).lean();
+          ],
+        },
+        {
+          status: "active",
+        },
+      ],
+    })
+    .lean();
   for (let data of rooms) {
     if (data.host == userId) {
       data.host = true;
@@ -133,26 +136,28 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
 
 exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
-  const rooms = await storyRoomModel.find({
-    $and: [
-      {
-        $or: [
-          { host: userId },
-          {
-            participants: {
-              $elemMatch: {
-                _id: userId,
-                invitationAccepted: true,
+  const rooms = await storyRoomModel
+    .find({
+      $and: [
+        {
+          $or: [
+            { host: userId },
+            {
+              participants: {
+                $elemMatch: {
+                  _id: userId,
+                  invitationAccepted: true,
+                },
               },
             },
-          },
-        ],
-      },
-      {
-        status: "upcoming",
-      },
-    ],
-  }).lean();
+          ],
+        },
+        {
+          status: "upcoming",
+        },
+      ],
+    })
+    .lean();
   for (let data of rooms) {
     if (data.host == userId) {
       data.host = true;
@@ -170,26 +175,28 @@ exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
 
 exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
-  const rooms = await storyRoomModel.find({
-    $and: [
-      {
-        $or: [
-          { host: userId },
-          {
-            participants: {
-              $elemMatch: {
-                _id: userId,
-                invitationAccepted: true,
+  const rooms = await storyRoomModel
+    .find({
+      $and: [
+        {
+          $or: [
+            { host: userId },
+            {
+              participants: {
+                $elemMatch: {
+                  _id: userId,
+                  invitationAccepted: true,
+                },
               },
             },
-          },
-        ],
-      },
-      {
-        status: "completed",
-      },
-    ],
-  }).lean();
+          ],
+        },
+        {
+          status: "completed",
+        },
+      ],
+    })
+    .lean();
 
   for (let data of rooms) {
     if (data.host == userId) {
@@ -253,5 +260,28 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     status: 200,
     message: "story completed",
+  });
+});
+
+exports.createChat = catchAsyncError(async (req, res, next) => {
+  const { message, roomId } = req.body;
+  const room = storyRoomModel.findById(roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room Not Found", 404));
+  }
+  if (room.status === "active") {
+    room.chats.push({ sender:req.userId, message });
+    await room.save();
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "Story telling is not yet Started or Completed",
+    });
+  }
+
+  res.status(200).json({
+    status: 200,
+    success: true,
+    message: "Chat saved Succesfully",
   });
 });

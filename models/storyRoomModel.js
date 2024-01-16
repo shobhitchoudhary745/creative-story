@@ -30,14 +30,20 @@ const storyRoomSchema = new mongoose.Schema(
         },
       },
     ],
-    numberOfRounds:{
-      type:Number,
-      required:[true,"Please Enter NumberOfRounds"]
+    numberOfRounds: {
+      type: Number,
+      required: [true, "Please Enter NumberOfRounds"],
     },
-    status:{
-      type:String,
-      default:"upcoming"
-    }
+    status: {
+      type: String,
+      default: "upcoming",
+    },
+    chats: [
+      {
+        sender: { type: mongoose.Schema.Types.ObjectId },
+        message: { type: String },
+      },
+    ],
   },
   { timestamps: true }
 );

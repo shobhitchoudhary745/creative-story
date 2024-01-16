@@ -9,20 +9,44 @@ connectDatabase();
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 const port = process.env.PORT;
+const users  ={}
 
 
 io.on("connection", socket => {
-  console.log("a user connected");
+  console.log("socket id:",socket.id);
   socket.on("joinRoom",async({roomId})=>{
     try{
-    socket.join(roomId)
+    socket.join(roomId);
   }catch(err){
       console.log(err)
       io.to(socket.id).emit("error",err);
     }
   })
+  socket.on("login",async({id})=>{
+    try{
+      socket.join(id);
+      users[socket.id] = id;
+      console.log(users);
+    }catch(err){
+      console.log(err);
+      io.to(socket.id).emit("error",err);
+    }
+  })
 
-  socket.on("disconnect", async() => {something});
+  socket.on("message",async({roomName,message,senderId})=>{
+    try {
+      io.to(roomName).emit("sendMessage",{message,senderId});
+      console.log(roomName,message,senderId)
+    } catch (error) {
+      
+    }
+  })
+
+  socket.on("disconnect", async({id}) => {
+    console.log("user is disconnected: ",socket.id)
+    delete users[socket.id];
+    console.log(users);
+  });
 });
 
 server.listen(port, () => console.log("server running on port:" + port));

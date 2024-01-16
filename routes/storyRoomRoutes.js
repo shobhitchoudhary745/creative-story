@@ -9,6 +9,7 @@ const {
   endStory,
   getUpcomingStories,
   getCompletedStories,
+  createChat,
 } = require("../controllers/storyRoomController");
 const { auth } = require("../middlewares/auth");
 const router = express.Router();
@@ -22,4 +23,5 @@ router.get("/completed_stories", auth, getCompletedStories);
 router.patch("/acceptInvitation", auth, acceptInvitation);
 router.patch("/startStory/:roomId", auth, startStory);
 router.patch("/endStory/:roomId", auth, endStory);
+router.post("/create-chat", auth, createChat);
 module.exports = router;
