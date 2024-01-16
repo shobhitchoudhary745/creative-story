@@ -31,7 +31,7 @@ const storyRoomSchema = new mongoose.Schema(
       },
     ],
     numberOfRounds:{
-      type:String,
+      type:Number,
       required:[true,"Please Enter NumberOfRounds"]
     },
     status:{
