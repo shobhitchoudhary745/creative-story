@@ -3,8 +3,15 @@ const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 
 exports.createRoom = catchAsyncError(async (req, res, next) => {
-  const { roomName, theme, description, participants, numberOfRounds } =
-    req.body;
+  const {
+    roomName,
+    theme,
+    description,
+    participants,
+    numberOfRounds,
+    userInvitations,
+  } = req.body;
+
   const room = await storyRoomModel.create({
     roomName,
     theme,
@@ -13,6 +20,8 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     participants,
     numberOfRounds,
   });
+
+
   res.status(201).send({
     status: 201,
     success: true,
@@ -20,6 +29,8 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     message: "room Created Successfully",
   });
 });
+
+
 
 exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
   const { roomId } = req.params;
@@ -265,12 +276,13 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
 
 exports.createChat = catchAsyncError(async (req, res, next) => {
   const { message, roomId } = req.body;
-  const room = storyRoomModel.findById(roomId);
+  const room = await storyRoomModel.findById(roomId);
   if (!room) {
     return next(new ErrorHandler("Room Not Found", 404));
   }
+  // console.log(room)
   if (room.status === "active") {
-    room.chats.push({ sender:req.userId, message });
+    room.chats.push({ sender: req.userId, message });
     await room.save();
   } else {
     res.status(400).json({
