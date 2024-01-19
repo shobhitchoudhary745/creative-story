@@ -12,6 +12,10 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     userInvitations,
   } = req.body;
 
+  if (participants.length < 1) {
+    return next(new ErrorHandler("Please add Atleast One participants", 400));
+  }
+
   const room = await storyRoomModel.create({
     roomName,
     theme,
@@ -21,16 +25,17 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     numberOfRounds,
   });
 
+  const populatedRoom = await storyRoomModel
+  .findById(room._id)
+  .populate('participants._id', 'userName profileUrl');
 
   res.status(201).send({
     status: 201,
     success: true,
-    data: room,
+    data: populatedRoom,
     message: "room Created Successfully",
   });
 });
-
-
 
 exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
   const { roomId } = req.params;
