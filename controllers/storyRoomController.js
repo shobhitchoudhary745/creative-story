@@ -70,6 +70,12 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
 exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   const { userId, roomId, isAccept } = req.body;
   const roomDetails = await storyRoomModel.findById(roomId);
+  const notification = await notificationsModel.findOneAndUpdate(
+    { owner: req.userId },
+    { $pull: { notifications: room._id } },
+    { new: true }
+  );
+
   roomDetails.participants.map((data) => {
     if (data._id == userId) {
       data.invitationAccepted = isAccept;

@@ -23,5 +23,5 @@ router.get("/completed_stories", auth, getCompletedStories);
 router.patch("/acceptInvitation", auth, acceptInvitation);
 router.patch("/startStory/:roomId", auth, startStory);
 router.patch("/endStory/:roomId", auth, endStory);
-router.post("/send-chat", auth, createChat);
+router.post("/send-message", auth, createChat);
 module.exports = router;
