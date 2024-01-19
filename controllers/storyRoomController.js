@@ -44,6 +44,8 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     .populate("participants._id", "userName profileUrl")
     .lean();
 
+  delete populatedRoom.chats;
+
   res.status(201).send({
     status: 201,
     success: true,
@@ -57,8 +59,11 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
   const roomDetails = await storyRoomModel
     .findById(roomId)
     .populate("host", "name email")
-    .populate("participants._id", "name email")
+    .populate("participants._id", "userName profileUrl")
     .lean();
+
+  delete roomDetails.chats;
+
   res.status(200).send({
     status: 200,
     success: true,
@@ -82,7 +87,7 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
     }
   });
   await roomDetails.save();
-
+  delete roomDetails.chats;
   res.status(202).send({
     status: 202,
     success: true,
@@ -94,10 +99,14 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
 exports.getMyStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
   // console.log(userId);
-  const rooms = await storyRoomModel.find().lean();
+  const rooms = await storyRoomModel
+    .find()
+    .populate("participants._id", "userName profileUrl")
+    .lean();
   const arr = [];
   // const admin = rooms.filter(data=>data.adminId==userId);
   for (let data of rooms) {
+    delete data.chats;
     console.log(userId);
     if (data.host == userId) {
       data.host = true;
@@ -155,8 +164,10 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
+    .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
+    delete data.chats;
     if (data.host == userId) {
       data.host = true;
     } else {
@@ -194,8 +205,10 @@ exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
+    .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
+    delete data.chats;
     if (data.host == userId) {
       data.host = true;
     } else {
@@ -233,9 +246,11 @@ exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
+    .populate("participants._id", "userName profileUrl")
     .lean();
 
   for (let data of rooms) {
+    delete data.chats;
     if (data.host == userId) {
       data.host = true;
     } else {
