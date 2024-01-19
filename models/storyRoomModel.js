@@ -30,6 +30,10 @@ const storyRoomSchema = new mongoose.Schema(
         },
       },
     ],
+    acceptedInvitation:[{
+      type:String,
+      ref:"User"
+    }],
     numberOfRounds: {
       type: Number,
       required: [true, "Please Enter NumberOfRounds"],

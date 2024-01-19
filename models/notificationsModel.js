@@ -8,12 +8,8 @@ const notificationsSchema = new mongoose.Schema(
     },
     notifications: [
       {
-        notificationType: {
-          type: String,
-        },
-        count: {
-          type: Number,
-        },
+        type:String,
+        ref:"StoryRoom"
       },
     ],
   },

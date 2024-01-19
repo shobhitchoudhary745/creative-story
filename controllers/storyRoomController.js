@@ -1,3 +1,4 @@
+const notificationsModel = require("../models/notificationsModel");
 const storyRoomModel = require("../models/storyRoomModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
@@ -15,6 +16,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   if (participants.length < 1) {
     return next(new ErrorHandler("Please add Atleast One participants", 400));
   }
+  let acceptedInvitation = [req.userId];
 
   const room = await storyRoomModel.create({
     roomName,
@@ -23,11 +25,24 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     host: req.userId,
     participants,
     numberOfRounds,
+    acceptedInvitation,
   });
 
+  const notificationPromises = participants.map((userId) => {
+    return notificationsModel.findOneAndUpdate(
+      { owner: userId },
+      { $push: { notifications: room._id } },
+      { new: true }
+    );
+  });
+
+  const updatedNotifications = await Promise.all(notificationPromises);
+  // console.log(updatedNotifications);
+
   const populatedRoom = await storyRoomModel
-  .findById(room._id)
-  .populate('participants._id', 'userName profileUrl');
+    .findById(room._id)
+    .populate("participants._id", "userName profileUrl")
+    .lean();
 
   res.status(201).send({
     status: 201,
