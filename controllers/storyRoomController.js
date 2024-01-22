@@ -341,7 +341,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getChat = catchAsyncError(async (req, res, next) => {
-  const { roomId } = req.params.roomId;
+  const { roomId } = req.params;
   const room = await storyRoomModel.findById(roomId);
   if (!room) {
     return next(new ErrorHandler("Room Not Found", 404));
