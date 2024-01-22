@@ -78,7 +78,7 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   const roomDetails = await storyRoomModel.findById(req.params.roomId);
   const notification = await notificationsModel.findOneAndUpdate(
     { owner: req.userId },
-    { $pull: { notifications: room._id } },
+    { $pull: { notifications: roomDetails._id } },
     { new: true }
   );
 
