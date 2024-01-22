@@ -7,6 +7,6 @@ exports.getNotification = catchAsyncError(async (req, res, next) => {
       status: 200,
       success: true,
       
-      data: notification,
+      data: notification.notifications,
     });
   });
