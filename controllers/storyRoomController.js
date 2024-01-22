@@ -356,7 +356,7 @@ exports.getChat = catchAsyncError(async (req, res, next) => {
 });
 
 exports.addParticipants = catchAsyncError(async (req, res, next) => {
-  const { roomId } = req.params.roomId;
+  const { roomId } = req.params;
   const { participants } = req.body;
   const room = await storyRoomModel.findById(roomId);
   if (!room) {
@@ -379,7 +379,7 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
 });
 
 exports.removeParticipant = catchAsyncError(async (req, res, next) => {
-  const { roomId } = req.params.roomId;
+  const { roomId } = req.params;
   const { participant } = req.body;
   const room = await storyRoomModel.findById(roomId);
   if (!room) {
