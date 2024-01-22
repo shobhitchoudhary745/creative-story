@@ -16,6 +16,10 @@ exports.auth = async (req, res, next) => {
       req.headers.authorization.split(" ")[1],
       process.env.JWT_SECRET
     );
+    const user = await userModel.findById(userId);
+    if(!user){
+      return next(new ErrorHandler("User not found",404));
+    }
     req.userId = userId;
     // console.log(userId)
     next();

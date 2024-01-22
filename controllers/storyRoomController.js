@@ -41,6 +41,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
   const populatedRoom = await storyRoomModel
     .findById(room._id)
+    .populate("host","userName profileUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -73,8 +74,8 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
 });
 
 exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
-  const { userId, roomId, isAccept } = req.body;
-  const roomDetails = await storyRoomModel.findById(roomId);
+  const { isAccept } = req.body;
+  const roomDetails = await storyRoomModel.findById(req.params.roomId);
   const notification = await notificationsModel.findOneAndUpdate(
     { owner: req.userId },
     { $pull: { notifications: room._id } },
@@ -82,7 +83,7 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   );
 
   roomDetails.participants.map((data) => {
-    if (data._id == userId) {
+    if (data._id == req.userId) {
       data.invitationAccepted = isAccept;
     }
   });
@@ -316,8 +317,8 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
 });
 
 exports.createChat = catchAsyncError(async (req, res, next) => {
-  const { message, roomId } = req.body;
-  const room = await storyRoomModel.findById(roomId);
+  const { message } = req.body;
+  const room = await storyRoomModel.findById(req.params.roomId);
   if (!room) {
     return next(new ErrorHandler("Room Not Found", 404));
   }
@@ -336,5 +337,43 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
     status: 200,
     success: true,
     message: "Chat saved Succesfully",
+  });
+});
+
+exports.getChat = catchAsyncError(async (req, res, next) => {
+  const { roomId } = req.params.roomId;
+  const room = await storyRoomModel.findById(roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room Not Found", 404));
+  }
+
+  res.status(200).json({
+    status: 200,
+    message:"Chat found",
+    success: true,
+    chats: room.chats,
+  });
+});
+
+exports.addParticipants = catchAsyncError(async (req, res, next) => {
+  const { roomId } = req.params.roomId;
+  const { participants } = req.body;
+  const room = await storyRoomModel.findById(roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room Not Found", 404));
+  }
+
+  if (req.userId != room.host) {
+    return next(new ErrorHandler("you did not have authority", 401));
+  }
+
+  room.participants = [...room.participants,...participants];
+  await room.save();
+
+  res.status(200).json({
+    status: 200,
+    message:"Participants added successfully",
+    success: true,
+    room
   });
 });
