@@ -41,7 +41,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
   const populatedRoom = await storyRoomModel
     .findById(room._id)
-    .populate("host","userName profileUrl")
+    .populate("host", "userName profileUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -349,7 +349,7 @@ exports.getChat = catchAsyncError(async (req, res, next) => {
 
   res.status(200).json({
     status: 200,
-    message:"Chat found",
+    message: "Chat found",
     success: true,
     chats: room.chats,
   });
@@ -367,13 +367,36 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("you did not have authority", 401));
   }
 
-  room.participants = [...room.participants,...participants];
+  room.participants = [...room.participants, ...participants];
   await room.save();
 
   res.status(200).json({
     status: 200,
-    message:"Participants added successfully",
+    message: "Participants added successfully",
     success: true,
-    room
+    room,
+  });
+});
+
+exports.removeParticipant = catchAsyncError(async (req, res, next) => {
+  const { roomId } = req.params.roomId;
+  const { participant } = req.body;
+  const room = await storyRoomModel.findById(roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room Not Found", 404));
+  }
+
+  if (req.userId != room.host) {
+    return next(new ErrorHandler("you did not have authority", 401));
+  }
+
+  room.participants = room.participants.filter((data) => data != participant);
+  await room.save();
+
+  res.status(200).json({
+    status: 200,
+    message: "Participants removed successfully",
+    success: true,
+    room,
   });
 });

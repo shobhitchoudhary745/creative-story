@@ -12,6 +12,7 @@ const {
   createChat,
   getChat,
   addParticipants,
+  removeParticipant,
 } = require("../controllers/storyRoomController");
 const { auth } = require("../middlewares/auth");
 const router = express.Router();
@@ -28,4 +29,5 @@ router.patch("/endStory/:roomId", auth, endStory);
 router.post("/send-message/:roomId", auth, createChat);
 router.get("/get-chats/:roomId", auth, getChat);
 router.patch("/add-participants/:roomId", auth, addParticipants);
+router.patch("/remove-participants/:roomId", auth, removeParticipant);
 module.exports = router;
