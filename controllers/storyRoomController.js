@@ -394,6 +394,15 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
 
   room.participants = [...room.participants, ...participants];
   await room.save();
+  const notificationPromises = participants.map((userId) => {
+    return notificationsModel.findOneAndUpdate(
+      { owner: userId },
+      { $push: { notifications: room._id } },
+      { new: true }
+    );
+  });
+
+  const updatedNotifications = await Promise.all(notificationPromises);
 
   res.status(200).json({
     status: 200,
