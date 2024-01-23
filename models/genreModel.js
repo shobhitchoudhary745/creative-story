@@ -4,16 +4,19 @@ const genreSchema = new mongoose.Schema(
   {
     genre: {
       type: String,
-      required:true
+      required: true,
     },
-    starter:[{
-        type:String
-    }],
-    colour:{
-      type:String
-    }
+    starter: [
+      {
+        starter: { type: String },
+        description: { type: String },
+      },
+    ],
+    colour: {
+      type: String,
+    },
   },
-  
+
   { timestamps: true }
 );
 
