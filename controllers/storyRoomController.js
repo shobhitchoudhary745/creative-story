@@ -41,15 +41,15 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   const updatedNotifications = await Promise.all(notificationPromises);
   // console.log(updatedNotifications);
   if (userInvitations.length > 0) {
-    userInvitations = userInvitations.map(email=>email.toLowerCase());
+    let userInvitations1 = userInvitations.map(email=>email.toLowerCase());
     const invitations = userInvitations.map((email) =>
       invitationsModel.create({ userEmail: email, room: room._id })
     );
     await Promise.all(invitations);
     const options = {
-      email: userInvitations,
+      email: userInvitations1,
       subject: "Invitation to join Creative story",
-      html: `${user.userName} is Inviting You to join ${room.roomName}`,
+      html: `${req.user.userName} is Inviting You to join ${room.roomName}`,
     };
     await sendInvitationEmail(options);
   }
