@@ -98,7 +98,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
   const invitations = await invitationModel.find({userEmail:email});
   invitations.map(invitation=>notifications.notifications.push(invitation.room));
   await notifications.save();
-
+  await invitationModel.deleteMany({userEmail:email});
   const options = {
     email: email.toLowerCase(),
     subject: "Email Verification",
