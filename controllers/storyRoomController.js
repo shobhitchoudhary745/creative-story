@@ -91,6 +91,9 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
 exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   const { isAccept } = req.body;
   const roomDetails = await storyRoomModel.findById(req.params.roomId);
+  if (roomDetails.status != "upcoming") {
+    return next(new ErrorHandler("Story is ongoing or completed", 400));
+  }
   const notification = await notificationsModel.findOneAndUpdate(
     { owner: req.userId },
     { $pull: { notifications: roomDetails._id } },
@@ -423,16 +426,15 @@ exports.removeParticipant = catchAsyncError(async (req, res, next) => {
   if (req.userId != room.host) {
     return next(new ErrorHandler("you did not have authority", 401));
   }
-  
+
   room.participants = room.participants.filter((data) => data != participant);
   await room.save();
-  
+
   const notification = await notificationsModel.findOneAndUpdate(
     { owner: participant },
     { $pull: { notifications: room._id } },
-    { new: true } 
-  )
-  
+    { new: true }
+  );
 
   res.status(200).json({
     status: 200,
