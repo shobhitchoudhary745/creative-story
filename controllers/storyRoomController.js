@@ -1,7 +1,9 @@
 const notificationsModel = require("../models/notificationsModel");
 const storyRoomModel = require("../models/storyRoomModel");
 const catchAsyncError = require("../utils/catchAsyncError");
+const invitationsModel = require("../models/invitationModel");
 const ErrorHandler = require("../utils/errorHandler");
+const { sendInvitationEmail } = require("../utils/email");
 
 exports.createRoom = catchAsyncError(async (req, res, next) => {
   const {
@@ -17,7 +19,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please add Atleast One participants", 400));
   }
   let acceptedInvitation = [req.userId];
-
+  
   const room = await storyRoomModel.create({
     roomName,
     theme,
@@ -38,6 +40,19 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
   const updatedNotifications = await Promise.all(notificationPromises);
   // console.log(updatedNotifications);
+  if (userInvitations.length > 0) {
+    userInvitations = userInvitations.map(email=>email.toLowerCase());
+    const invitations = userInvitations.map((email) =>
+      invitationsModel.create({ userEmail: email, room: room._id })
+    );
+    await Promise.all(invitations);
+    const options = {
+      email: userInvitations,
+      subject: "Invitation to join Creative story",
+      html: `${user.userName} is Inviting You to join ${room.roomName}`,
+    };
+    await sendInvitationEmail(options);
+  }
 
   const populatedRoom = await storyRoomModel
     .findById(room._id)
@@ -87,6 +102,9 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
       data.invitationAccepted = isAccept;
     }
   });
+  if (isAccept) {
+    roomDetails.acceptedInvitation.push(req.userId);
+  }
   await roomDetails.save();
   delete roomDetails.chats;
   res.status(202).send({

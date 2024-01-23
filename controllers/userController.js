@@ -2,7 +2,7 @@ const userModel = require("../models/userModel");
 const notificationsModel = require("../models/notificationsModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
-const sendEmail = require("../utils/email");
+const {sendEmail} = require("../utils/email");
 const { s3Uploadv2, deleteFile } = require("../utils/s3");
 const storyRoomModel = require("../models/storyRoomModel");
 

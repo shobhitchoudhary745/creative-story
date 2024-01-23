@@ -17,7 +17,7 @@ const {
   resetPassword,
   resendOtp,
 } = require("../controllers/userController");
-const sendEmail = require("../utils/email");
+const {sendEmail} = require("../utils/email");
 const { upload } = require("../utils/s3");
 
 router.post("/register", register);

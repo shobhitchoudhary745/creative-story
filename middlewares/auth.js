@@ -20,6 +20,7 @@ exports.auth = async (req, res, next) => {
     if(!user){
       return next(new ErrorHandler("User not found",404));
     }
+    req.user = user;
     req.userId = userId;
     // console.log(userId)
     next();
