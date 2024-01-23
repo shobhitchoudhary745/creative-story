@@ -5,6 +5,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const {sendEmail} = require("../utils/email");
 const { s3Uploadv2, deleteFile } = require("../utils/s3");
 const storyRoomModel = require("../models/storyRoomModel");
+const invitationModel = require("../models/invitationModel");
 
 const sendData = async (user, statusCode, res, purpose) => {
   const token = await user.getJWTToken();
@@ -91,9 +92,13 @@ exports.register = catchAsyncError(async (req, res, next) => {
     userName,
   });
   const owner = user._id;
-  await notificationsModel.create({
+  const notifications = await notificationsModel.create({
     owner,
   });
+  const invitations = await invitationModel.find({userEmail:email});
+  invitations.map(invitation=>notifications.notifications.push(invitation.room));
+  await notifications.save();
+
   const options = {
     email: email.toLowerCase(),
     subject: "Email Verification",
