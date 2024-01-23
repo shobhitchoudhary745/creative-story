@@ -44,7 +44,18 @@ const storyRoomSchema = new mongoose.Schema(
     },
     chats: [
       {
-        sender: { type: mongoose.Schema.Types.ObjectId },
+        sender: { 
+          senderId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"User"
+          },
+          senderName:{
+            type:String
+          },
+          senderProfileUrl:{
+            type:String
+          }
+         },
         message: { type: String },
       },
     ],

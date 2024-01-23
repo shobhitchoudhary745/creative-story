@@ -19,7 +19,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please add Atleast One participants", 400));
   }
   let acceptedInvitation = [req.userId];
-  
+
   const room = await storyRoomModel.create({
     roomName,
     theme,
@@ -41,7 +41,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   const updatedNotifications = await Promise.all(notificationPromises);
   // console.log(updatedNotifications);
   if (userInvitations.length > 0) {
-    let userInvitations1 = userInvitations.map(email=>email.toLowerCase());
+    let userInvitations1 = userInvitations.map((email) => email.toLowerCase());
     const invitations = userInvitations.map((email) =>
       invitationsModel.create({ userEmail: email, room: room._id })
     );
@@ -342,7 +342,14 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
   }
   // console.log(room)
   if (room.status === "active") {
-    room.chats.push({ sender: req.userId, message });
+    room.chats.push({
+      sender: {
+        senderId: req.userId,
+        senderName: req.user.userName,
+        senderProfileUrl: req.user.profileUrl,
+      },
+      message,
+    });
     await room.save();
   } else {
     res.status(400).json({
