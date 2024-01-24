@@ -16,6 +16,8 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     userInvitations,
   } = req.body;
 
+  participants[0].invitationAccepted = true;
+
   let acceptedInvitation = [req.userId];
 
   const room = await storyRoomModel.create({
@@ -28,7 +30,9 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     acceptedInvitation,
   });
 
-  const notificationPromises = participants.map((userId) => {
+
+  
+  const notificationPromises = participants.slice(1).map((userId) => {
     return notificationsModel.findOneAndUpdate(
       { owner: userId },
       { $push: { notifications: room._id } },
