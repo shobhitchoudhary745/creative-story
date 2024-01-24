@@ -7,6 +7,7 @@ const privacypolicyModel = require("../models/privacyPolicyModel");
 const termsAndConditionModel = require("../models/termsAndConditionModel");
 const ErrorHandler = require("../utils/errorHandler");
 const notificationsModel = require("../models/notificationsModel");
+const { s3Uploadv2 } = require("../utils/s3");
 
 exports.termsandcondition = catchAsyncError(async (req, res, next) => {
   const termsBody = await termsAndConditionModel.find().lean();
@@ -335,7 +336,13 @@ exports.updateGenre = catchAsyncError(async (req, res, next) => {
     description2,
     description3,
     colour,
+    backgroundColour,
   } = req.body;
+  let location;
+  if (req.file) {
+    const results = await s3Uploadv2(req.file);
+    location = results.Location && results.Location;
+  }
   const genres = await genreModel.findById(id);
 
   if (!genres) {
@@ -346,10 +353,12 @@ exports.updateGenre = catchAsyncError(async (req, res, next) => {
   if (starter1) genres.starter[0].starter = starter1;
   if (starter2) genres.starter[1].starter = starter2;
   if (starter3) genres.starter[2].starter = starter3;
-  if(description1) genres.starter[0].description = description1;
-  if(description2) genres.starter[1].description = description2;
-  if(description3) genres.starter[2].description = description3;
+  if (description1) genres.starter[0].description = description1;
+  if (description2) genres.starter[1].description = description2;
+  if (description3) genres.starter[2].description = description3;
   if (colour) genres.colour = colour;
+  if (backgroundColour) genre.backgroundColour = backgroundColour;
+  if(location) genre.imageUrl = location;
   await genres.save();
 
   res.status(200).send({

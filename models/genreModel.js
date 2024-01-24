@@ -15,6 +15,12 @@ const genreSchema = new mongoose.Schema(
     colour: {
       type: String,
     },
+    backgroundColour:{
+      type:String
+    },
+    imageUrl:{
+      type:String
+    }
   },
 
   { timestamps: true }

@@ -22,6 +22,7 @@ const {
   updateGenre,
 } = require("../controllers/adminController");
 const { isAdmin, auth } = require("../middlewares/auth");
+const { upload } = require("../utils/s3");
 const router = express.Router();
 
 router.get("/terms_and_conditions", termsandcondition);
@@ -42,6 +43,6 @@ router.put("/updateTermsAndCondition", auth, isAdmin, updateTermsAndCondition);
 router.get("/getAllGenres", auth, isAdmin, getAllGenre);
 router.delete("/deleteGenre/:id", auth, isAdmin, deleteGenre);
 router.get("/getGenre/:id", auth, isAdmin, getGenre);
-router.put("/updateGenre/:id", auth, isAdmin, updateGenre);
+router.put("/updateGenre/:id", auth, isAdmin,upload.single("image"), updateGenre);
 
 module.exports = router;
