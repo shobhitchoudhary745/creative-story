@@ -16,7 +16,6 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     userInvitations,
   } = req.body;
 
-  
   let acceptedInvitation = [req.userId];
 
   const room = await storyRoomModel.create({
@@ -41,9 +40,9 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   // console.log(updatedNotifications);
   if (userInvitations.length > 0) {
     let userInvitations1 = userInvitations.map((email) => email.toLowerCase());
-    const invitations = userInvitations.map((email) =>
-      invitationsModel.create({ userEmail: email, room: room._id })
-    );
+    const invitations = userInvitations1.map((email) => {
+      return invitationsModel.create({ userEmail: email, room: room._id });
+    });
     await Promise.all(invitations);
     const options = {
       email: userInvitations1,
@@ -114,7 +113,9 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
     status: 202,
     success: true,
     data: roomDetails,
-    message: isAccept?`Invitation Accepted Successfully`:`Invitation Rejected Successfully`,
+    message: isAccept
+      ? `Invitation Accepted Successfully`
+      : `Invitation Rejected Successfully`,
   });
 });
 
