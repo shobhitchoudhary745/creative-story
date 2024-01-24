@@ -123,7 +123,6 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
   // console.log(userId);
   const rooms = await storyRoomModel
     .find()
-    .populate("host", "userName profileUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
   const arr = [];
@@ -187,7 +186,6 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .populate("host", "userName profileUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
@@ -229,7 +227,6 @@ exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .populate("host", "userName profileUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
@@ -271,7 +268,6 @@ exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .populate("host", "userName profileUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
