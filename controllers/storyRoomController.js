@@ -114,7 +114,7 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
     status: 202,
     success: true,
     data: roomDetails,
-    message: "Invitation Accepted/Rejected successfully",
+    message: isAccept?`Invitation Accepted Successfully`:`Invitation Rejected Successfully`,
   });
 });
 
