@@ -30,8 +30,6 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     acceptedInvitation,
   });
 
-
-  
   const notificationPromises = participants.slice(1).map((userId) => {
     return notificationsModel.findOneAndUpdate(
       { owner: userId },
@@ -125,46 +123,35 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
 
 exports.getMyStories = catchAsyncError(async (req, res, next) => {
   let userId = req.userId;
-  // console.log(userId);
   const rooms = await storyRoomModel
-    .find()
+    .find({
+      $or: [
+        { host: userId },
+        {
+          participants: {
+            $elemMatch: {
+              _id: userId,
+            },
+          },
+        },
+      ],
+    })
     .populate("participants._id", "userName profileUrl")
     .lean();
-  const arr = [];
-  // const admin = rooms.filter(data=>data.adminId==userId);
+
   for (let data of rooms) {
     delete data.chats;
-    console.log(userId);
     if (data.host == userId) {
       data.host = true;
-      arr.push(data);
-      continue;
-    }
-    for (let participant of data.participants) {
-      if (participant._id == userId && participant.invitationAccepted) {
-        data.host = false;
-        arr.push(data);
-        break;
-      }
+    } else {
+      data.host = false;
     }
   }
-  //   $or: [
-  //     { admin: userId },
-  //     {
-  //       participants: {
-  //         $elemMatch: {
-  //           _id: userId,
-  //           invitationAccepted: true,
-  //         },
-  //       },
-  //     },
-  //   ],
-  // });
 
   res.status(200).send({
     status: 200,
-    length: arr.length,
-    my_stories: arr,
+    length: rooms.length,
+    my_stories: rooms,
   });
 });
 
@@ -309,7 +296,9 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   }
 
   room.status = "active";
-  room.participants = room.participants.filter(participant => participant.invitationAccepted === true);
+  room.participants = room.participants.filter(
+    (participant) => participant.invitationAccepted === true
+  );
   await room.save();
 
   res.status(200).json({
