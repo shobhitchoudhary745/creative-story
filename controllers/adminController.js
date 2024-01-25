@@ -346,7 +346,7 @@ exports.updateGenre = catchAsyncError(async (req, res, next) => {
   const genres = await genreModel.findById(id);
 
   if (!genres) {
-    return next(new Error("user not found", 400));
+    return next(new Error("Genre not found", 400));
   }
 
   if (genre) genres.genre = genre;

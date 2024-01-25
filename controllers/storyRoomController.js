@@ -299,7 +299,7 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   if (!room) {
     res.status(400).json({ message: "Story not found" });
   }
-  console.log(room.host, " ", req.userId);
+  // console.log(room.host, " ", req.userId);
   if (room.host != req.userId) {
     res.status(403).json({ message: "You do not have access" });
   }
@@ -309,6 +309,7 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   }
 
   room.status = "active";
+  room.participants = room.participants.filter(participant => participant.invitationAccepted === true);
   await room.save();
 
   res.status(200).json({
