@@ -152,6 +152,7 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
           participants: {
             $elemMatch: {
               _id: userId,
+              invitationAccepted:true
             },
           },
         },
