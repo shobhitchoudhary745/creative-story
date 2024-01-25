@@ -113,19 +113,19 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
     if (data._id != req.userId) {
       temp.push(data);
     } else {
-      check=true;
+      check = true;
       if (isAccept) {
         data.invitationAccepted = true;
         temp.push(data);
       }
     }
   }
-  if(!check) {
-    if(isAccept){
-      temp.push({_id:req.userId,invitationAccepted:isAccept})
+  if (!check) {
+    if (isAccept) {
+      temp.push({ _id: req.userId, invitationAccepted: isAccept });
     }
   }
-  
+
   roomDetails.participants = temp;
 
   if (isAccept) {
@@ -154,7 +154,7 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
           participants: {
             $elemMatch: {
               _id: userId,
-              invitationAccepted:true
+              invitationAccepted: true,
             },
           },
         },
@@ -320,9 +320,21 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   }
 
   room.status = "active";
-  room.participants = room.participants.filter(
-    (participant) => participant.invitationAccepted === true
-  );
+  // room.participants = room.participants.filter(
+  //   (participant) => participant.invitationAccepted === true
+  // );
+  let temp = [];
+  for (let data of room.participants) {
+    if (data.invitationAccepted) {
+      temp.push(data);
+    } else {
+      await notificationsModel.findOneAndUpdate(
+        { owner: data._id },
+        { $pull: { notifications: room._id } }
+      );
+    }
+  }
+  room.participants = temp;
   await room.save();
 
   res.status(200).json({
