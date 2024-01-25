@@ -106,15 +106,22 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   //     data.invitationAccepted = isAccept;
   //   }
   // });
+  let check = false;
   let temp = [];
   for (let data of roomDetails.participants) {
     if (data._id != req.userId) {
       temp.push(data);
     } else {
       if (isAccept) {
+        temp=true;
         data.invitationAccepted = true;
         temp.push(data);
       }
+    }
+  }
+  if(!check){
+    if(isAccept){
+      temp.push({_id:req.userId,invitationAccepted:isAccept})
     }
   }
 
