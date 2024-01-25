@@ -37,11 +37,11 @@ io.on("connection", socket => {
     }
   })
 
-  socket.on("message",async()=>{
+  socket.on("message",async({roomId,message,senderId})=>{
     try {
-      // io.to(roomId).emit("sendMessage",{message,senderId});
-      io.emit("welcome",{message:"hello Ansh from server"})
-      // console.log(roomId,message,senderId)
+      io.to(roomId).emit("sendMessage",{message,senderId});
+      // io.emit("welcome",{message:"hello Ansh from server"})
+      console.log(roomId,message,senderId)
     } catch (error) {
       
     }
