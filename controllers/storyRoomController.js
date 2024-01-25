@@ -422,7 +422,7 @@ exports.removeParticipant = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("you did not have authority", 401));
   }
 
-  room.participants = room.participants.filter((data) => data != participant);
+  room.participants = room.participants.filter((data) => data._id != participant);
   await room.save();
 
   const notification = await notificationsModel.findOneAndUpdate(
