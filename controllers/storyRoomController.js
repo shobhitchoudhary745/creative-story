@@ -101,11 +101,25 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
     { new: true }
   );
 
-  roomDetails.participants.map((data) => {
-    if (data._id == req.userId) {
-      data.invitationAccepted = isAccept;
+  // roomDetails.participants.map((data) => {
+  //   if (data._id == req.userId) {
+  //     data.invitationAccepted = isAccept;
+  //   }
+  // });
+  let temp = [];
+  for (let data of roomDetails.participants) {
+    if (data._id != req.userId) {
+      temp.push(data);
+    } else {
+      if (isAccept) {
+        data.invitationAccepted = true;
+        temp.push(data);
+      }
     }
-  });
+  }
+
+  roomDetails.participants = temp;
+
   if (isAccept) {
     roomDetails.acceptedInvitation.push(req.userId);
   }
@@ -390,6 +404,8 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("you did not have authority", 401));
   }
 
+  console.log(participants);
+
   room.participants = [...room.participants, ...participants];
   await room.save();
   const notificationPromises = participants.map((userId) => {
@@ -422,7 +438,9 @@ exports.removeParticipant = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("you did not have authority", 401));
   }
 
-  room.participants = room.participants.filter((data) => data._id != participant);
+  room.participants = room.participants.filter(
+    (data) => data._id != participant
+  );
   await room.save();
 
   const notification = await notificationsModel.findOneAndUpdate(
