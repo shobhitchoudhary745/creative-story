@@ -14,6 +14,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     participants,
     numberOfRounds,
     userInvitations,
+    genreId
   } = req.body;
 
   participants[0].invitationAccepted = true;
@@ -28,6 +29,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     participants,
     numberOfRounds,
     acceptedInvitation,
+    genreId
   });
 
   const notificationPromises = participants.slice(1).map((userId) => {
@@ -57,6 +59,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   const populatedRoom = await storyRoomModel
     .findById(room._id)
     .populate("host", "userName profileUrl")
+    .populate("genreId","colour backgroundColour,imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -75,6 +78,7 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
   const roomDetails = await storyRoomModel
     .findById(roomId)
     .populate("host", "userName profileUrl")
+    .populate("genreId","colour backgroundColour,imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -160,6 +164,7 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
+    .populate("genreId","colour backgroundColour,imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -202,6 +207,7 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
+    .populate("genreId","colour backgroundColour,imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
@@ -243,6 +249,7 @@ exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
+    .populate("genreId","colour backgroundColour,imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
@@ -284,6 +291,7 @@ exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
+    .populate("genreId","colour backgroundColour,imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 

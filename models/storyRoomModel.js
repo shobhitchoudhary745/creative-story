@@ -30,6 +30,10 @@ const storyRoomSchema = new mongoose.Schema(
         },
       },
     ],
+    genreId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref:"Genres"
+    },
     acceptedInvitation:[{
       type:String,
       ref:"User"
