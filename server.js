@@ -14,6 +14,7 @@ const rooms = {};
 
 
 io.on("connection", socket => {
+  io.emit("welcome",{data:"welcome Ansh from server"});
   console.log("socket id:",socket.id);
   socket.on("joinRoom",async({roomId})=>{
     try{
