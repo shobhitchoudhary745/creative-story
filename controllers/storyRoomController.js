@@ -106,25 +106,26 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   //     data.invitationAccepted = isAccept;
   //   }
   // });
+
   let check = false;
   let temp = [];
   for (let data of roomDetails.participants) {
     if (data._id != req.userId) {
       temp.push(data);
     } else {
+      check=true;
       if (isAccept) {
-        temp=true;
         data.invitationAccepted = true;
         temp.push(data);
       }
     }
   }
-  if(!check){
+  if(!check) {
     if(isAccept){
       temp.push({_id:req.userId,invitationAccepted:isAccept})
     }
   }
-
+  
   roomDetails.participants = temp;
 
   if (isAccept) {
@@ -132,6 +133,7 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   }
   await roomDetails.save();
   delete roomDetails.chats;
+
   res.status(202).send({
     status: 202,
     success: true,
