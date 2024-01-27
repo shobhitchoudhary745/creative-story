@@ -14,7 +14,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     participants,
     numberOfRounds,
     userInvitations,
-    genreId
+    genreId,
   } = req.body;
 
   participants[0].invitationAccepted = true;
@@ -29,7 +29,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     participants,
     numberOfRounds,
     acceptedInvitation,
-    genreId
+    genreId,
   });
 
   const notificationPromises = participants.slice(1).map((userId) => {
@@ -59,7 +59,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   const populatedRoom = await storyRoomModel
     .findById(room._id)
     .populate("host", "userName profileUrl")
-    .populate("genreId","colour backgroundColour imageUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -78,13 +78,12 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
   const roomDetails = await storyRoomModel
     .findById(roomId)
     .populate("host", "userName profileUrl")
-    .populate("genreId","colour backgroundColour imageUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
   delete roomDetails.chats;
-  // const genre = await genreModel.findOne({genre:roomDetails.genre});
-  // roomDetails.colour = genre.colour
+
   res.status(200).send({
     status: 200,
     success: true,
@@ -96,6 +95,14 @@ exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
 exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
   const { isAccept } = req.body;
   const roomDetails = await storyRoomModel.findById(req.params.roomId);
+  if (!roomDetails) {
+    await notificationsModel.findOneAndUpdate(
+      { owner: req.userId },
+      { $pull: { notifications: roomDetails._id } },
+      { new: true }
+    );
+    return next(new ErrorHandler("Room not found",400))
+  }
   if (roomDetails.status != "upcoming") {
     return next(new ErrorHandler("Story is ongoing or completed", 400));
   }
@@ -104,12 +111,6 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
     { $pull: { notifications: roomDetails._id } },
     { new: true }
   );
-
-  // roomDetails.participants.map((data) => {
-  //   if (data._id == req.userId) {
-  //     data.invitationAccepted = isAccept;
-  //   }
-  // });
 
   let check = false;
   let temp = [];
@@ -164,7 +165,7 @@ exports.getMyStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .populate("genreId","colour backgroundColour imageUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -207,7 +208,7 @@ exports.getActiveStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .populate("genreId","colour backgroundColour imageUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
@@ -249,7 +250,7 @@ exports.getUpcomingStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .populate("genreId","colour backgroundColour imageUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
   for (let data of rooms) {
@@ -291,7 +292,7 @@ exports.getCompletedStories = catchAsyncError(async (req, res, next) => {
         },
       ],
     })
-    .populate("genreId","colour backgroundColour imageUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
     .populate("participants._id", "userName profileUrl")
     .lean();
 
@@ -327,10 +328,9 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
     res.status(401).json({ message: "Story already completed/ongoing" });
   }
 
+  await invitationsModel.deleteMany({ room: roomId });
+
   room.status = "active";
-  // room.participants = room.participants.filter(
-  //   (participant) => participant.invitationAccepted === true
-  // );
   let temp = [];
   for (let data of room.participants) {
     if (data.invitationAccepted) {

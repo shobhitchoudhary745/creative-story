@@ -8,7 +8,7 @@ exports.createGenre = catchAsyncError(async (req, res, next) => {
   // console.log(req.body);
   const file = req.file;
   const results = await s3Uploadv2(file);
-  console.log(results)
+  
   const location = results.Location && results.Location;
   const genres = await genreModel.create({
     genre,

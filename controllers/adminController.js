@@ -25,17 +25,11 @@ exports.getAllStoryRoom = catchAsyncError(async (req, res, next) => {
   const { currentPage, resultPerPage, key } = req.query;
   let query = {};
   if (key && key.trim() != 0) {
-    // query.username = { $regex: key, $options: 'i' };
+    
     query.roomName = { $regex: key, $options: "i" };
   }
   const skip = resultPerPage * (currentPage - 1);
-  // const storyCount = await storyRoomModel.countDocuments(query);
-  // const rooms = await storyRoomModel
-  //   .find(query)
-  //   .populate({ path: "host", select: ["firstName", "lastName"] })
-  //   .limit(resultPerPage)
-  //   .skip(skip)
-  //   .lean();
+ 
   const [storyCount, rooms] = await Promise.all([
     storyRoomModel.countDocuments(query),
     storyRoomModel
@@ -140,10 +134,6 @@ exports.updateAdminProfile = catchAsyncError(async (req, res, next) => {
 });
 
 exports.getDashboardData = catchAsyncError(async (req, res, next) => {
-  // const userCount = await userModel.countDocuments();
-  // const storyCount = await storyRoomModel.find({});
-  // const genreCount = await genreModel.countDocuments();
-
   const [userCount, storyCount, genreCount] = await Promise.all([
     userModel.countDocuments(),
     storyRoomModel.find({}).lean(),
@@ -184,13 +174,8 @@ exports.getAllUser = catchAsyncError(async (req, res, next) => {
       { lastName: { $regex: key, $options: "i" } },
     ];
   }
-  // const userCount = await userModel.countDocuments(query);
+ 
   const skip = resultPerPage * (currentPage - 1);
-  // const users = await userModel
-  //   .find(query)
-  //   .limit(resultPerPage)
-  //   .skip(skip)
-  //   .lean();
 
   const [userCount, users] = await Promise.all([
     userModel.countDocuments(query),
@@ -284,12 +269,7 @@ exports.getAllGenre = catchAsyncError(async (req, res, next) => {
     query.genre = { $regex: key, $options: "i" };
   }
   const skip = resultPerPage * (currentPage - 1);
-  // const genreCount = await genreModel.countDocuments(query);
-  // const genres = await genreModel
-  //   .find(query)
-  //   .limit(resultPerPage)
-  //   .skip(skip)
-  //   .lean();
+  
 
   const [genreCount, genres] = await Promise.all([
     genreModel.countDocuments(query),
