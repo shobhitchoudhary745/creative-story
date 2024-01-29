@@ -16,8 +16,9 @@ const {
   getAllUser,
   resetPassword,
   resendOtp,
+  authentication,
 } = require("../controllers/userController");
-const {sendEmail} = require("../utils/email");
+const { sendEmail } = require("../utils/email");
 const { upload } = require("../utils/s3");
 
 router.post("/register", register);
@@ -35,4 +36,5 @@ router.patch("/update_profile", auth, upload.single("image"), updateProfile);
 router.get("/getAllUsers", auth, getAllUser);
 router.patch("/reset_password", resetPassword);
 router.post("/resendOtp", resendOtp);
+router.get("/isAuthenticated", authentication);
 module.exports = router;

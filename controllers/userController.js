@@ -5,6 +5,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const {sendEmail} = require("../utils/email");
 const { s3Uploadv2, deleteFile } = require("../utils/s3");
 const storyRoomModel = require("../models/storyRoomModel");
+const jwt = require("jsonwebtoken");
 const invitationModel = require("../models/invitationModel");
 
 const sendData = async (user, statusCode, res, purpose) => {
@@ -368,3 +369,38 @@ exports.resendOtp = catchAsyncError(async (req, res, next) => {
     message: "otp resend successfully",
   });
 });
+
+exports.authentication = async (req, res, next) => {
+  try {
+    if (!req.headers.authorization) {
+      return res.status(401).send({
+        error: {
+          message: `Unauthorized.Please Send token in request header`,
+        },
+      });
+    }
+   
+    const { userId } = jwt.verify(
+      req.headers.authorization.split(" ")[1],
+      process.env.JWT_SECRET
+    );
+    const user = await userModel.findById(userId);
+    if(!user){
+      return res.status(400).send({
+        authentication:false,
+        success:false,
+        message:"User not found"
+      })
+    }
+
+    res.status(200).send({
+      authentication:true,
+      success:true,
+      message:"User found"
+    })
+    
+    
+  } catch (error) {
+    return res.status(401).send({ error: { message: `Unauthorized` } });
+  }
+};
