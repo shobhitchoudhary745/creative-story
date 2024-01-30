@@ -8,6 +8,7 @@ const morgan = require('morgan');
 dotenv.config({ path: "./config/config.env" });
 
 app.use(express.json());
+
 app.use(helmet());
 app.use(morgan('tiny'));
 app.use(

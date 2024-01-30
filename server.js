@@ -49,11 +49,11 @@ io.on("connection", socket => {
 
   socket.on("disconnect", async({id}) => {
     console.log("user is disconnected: ",socket.id);
-    for(let i of rooms[users[socket.id]]){
-      io.to(i).emit("user-left",{})
-    }
-    delete users[socket.id];
-    console.log(users);
+    // for(let i of rooms[users[socket.id]]){
+    //   io.to(i).emit("user-left",{})
+    // }
+    // delete users[socket.id];
+    // console.log(users);
   });
 });
 
