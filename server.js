@@ -9,46 +9,51 @@ connectDatabase();
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 const port = process.env.PORT;
-const users  = {};
+const users = {};
 const rooms = {};
 
+io.on("connection", (socket) => {
+  io.emit("welcome", { data: "welcome Ansh from server" });
+  console.log("socket id:", socket.id);
 
-io.on("connection", socket => {
-  io.emit("welcome",{data:"welcome Ansh from server"});
-  console.log("socket id:",socket.id);
-  socket.on("joinRoom",async({roomId})=>{
-    try{
-    rooms[users[socket.id]] = [];
-    rooms[users[socket.id]].push(roomId);
-    socket.join(roomId);
-  }catch(err){
-      console.log(err)
-      io.to(socket.id).emit("error",err);
+  socket.on("createStory", async ({ hostname, roomname, participants }) => {
+    try {
+      for (let user of participants) {
+        io.to(user).emit("storyInvitation", { hostname, roomname });
+      }
+    } catch (error) {}
+  });
+  socket.on("joinRoom", async ({ roomId }) => {
+    try {
+      rooms[users[socket.id]] = [];
+      rooms[users[socket.id]].push(roomId);
+      socket.join(roomId);
+    } catch (err) {
+      console.log(err);
+      io.to(socket.id).emit("error", err);
     }
-  })
-  socket.on("login",async({id})=>{
-    try{
-      socket.join(id);
+  });
+  socket.on("login", async ({ id }) => {
+    try {
+      socket.join(id); //personal message
       users[socket.id] = id;
       console.log(users);
-    }catch(err){
+    } catch (err) {
       console.log(err);
-      io.to(socket.id).emit("error",err);
+      io.to(socket.id).emit("error", err);
     }
-  })
+  });
 
-  socket.on("message",async({roomId,message,senderId})=>{
+  socket.on("message", async ({ roomId, message, senderId }) => {
     try {
-      io.to(roomId).emit("sendMessage",{message,senderId});
+      io.to(roomId).emit("sendMessage", { message, senderId });
       // io.emit("welcome",{message:"hello Ansh from server"})
-      console.log(roomId,message,senderId)
-    } catch (error) {
-      
-    }
-  })
+      console.log(roomId, message, senderId);
+    } catch (error) {}
+  });
 
-  socket.on("disconnect", async({id}) => {
-    console.log("user is disconnected: ",socket.id);
+  socket.on("disconnect", async ({ id }) => {
+    console.log("user is disconnected: ", socket.id);
     // for(let i of rooms[users[socket.id]]){
     //   io.to(i).emit("user-left",{})
     // }
@@ -58,13 +63,6 @@ io.on("connection", socket => {
 });
 
 server.listen(port, () => console.log("server running on port:" + port));
-
-
-
-
-
-
-
 
 // if (cluster.isMaster) {
 //   totalCpus.forEach(async (node) => {
