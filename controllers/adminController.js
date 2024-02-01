@@ -337,8 +337,8 @@ exports.updateGenre = catchAsyncError(async (req, res, next) => {
   if (description2) genres.starter[1].description = description2;
   if (description3) genres.starter[2].description = description3;
   if (colour) genres.colour = colour;
-  if (backgroundColour) genre.backgroundColour = backgroundColour;
-  if(location) genre.imageUrl = location;
+  if (backgroundColour) genres.backgroundColour = backgroundColour;
+  if(location) genres.imageUrl = location;
   await genres.save();
 
   res.status(200).send({
