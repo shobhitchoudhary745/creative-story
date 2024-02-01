@@ -8,7 +8,11 @@ exports.getNotification = catchAsyncError(async (req, res, next) => {
       path: "notifications",
       populate: {
         path: "host",
-        select:"userName profileUrl"
+        select: "userName profileUrl",
+      },
+      populate: {
+        path: "genreId",
+        select: "colour backgroundColour imageUrl",
       },
     })
     .lean();
