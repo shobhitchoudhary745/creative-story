@@ -36,6 +36,7 @@ io.on("connection", (socket) => {
   socket.on("login", async ({ id }) => {
     try {
       socket.join(id); //personal message
+      io.to(id).emit("loginSuccessfully",{message:"Welcome User",id});
       users[socket.id] = id;
       console.log(users);
     } catch (err) {
