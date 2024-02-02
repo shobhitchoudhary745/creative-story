@@ -16,13 +16,28 @@ io.on("connection", (socket) => {
   io.emit("welcome", { data: "welcome Ansh from server" });
   console.log("socket id:", socket.id);
 
-  socket.on("createStory", async ({ hostname, roomname, participants }) => {
+  socket.on("createStory", async (data) => {
     try {
-      for (let user of participants) {
-        io.to(user).emit("storyInvitation", { hostname, roomname });
+      for (let user of data["participants"]) {
+        io.to(user["_id"]).emit("storyInvitation", { data });
       }
     } catch (error) {}
   });
+
+  socket.on("addParticipants", async (data) => {
+    try {
+      for (let user of data["participants"]) {
+        io.to(user["_id"]).emit("addRequest", { data });
+      }
+    } catch (error) {}
+  });
+
+  socket.on("removeParticipants", async (data) => {
+    try {
+      io.to(data["participant"]).emit("removeInvitation", { data });
+    } catch (error) {}
+  });
+
   socket.on("joinRoom", async ({ roomId }) => {
     try {
       rooms[users[socket.id]] = [];
@@ -36,7 +51,7 @@ io.on("connection", (socket) => {
   socket.on("login", async ({ id }) => {
     try {
       socket.join(id); //personal message
-      io.to(id).emit("loginSuccessfully",{message:"Welcome User",id});
+      io.to(id).emit("loginSuccessfully", { message: "Welcome User", id });
       users[socket.id] = id;
       console.log(users);
     } catch (err) {
