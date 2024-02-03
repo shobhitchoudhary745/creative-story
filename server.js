@@ -21,7 +21,9 @@ io.on("connection", (socket) => {
       for (let user of data["participants"]) {
         io.to(user["_id"]).emit("storyInvitation", { data });
       }
-    } catch (error) {}
+    } catch (error) {
+      io.to(socket.id).emit("error", err);
+    }
   });
 
   socket.on("addParticipants", async (data) => {
@@ -29,13 +31,33 @@ io.on("connection", (socket) => {
       for (let user of data["participants"]) {
         io.to(user["_id"]).emit("addRequest", { data });
       }
-    } catch (error) {}
+    } catch (error) {
+      io.to(socket.id).emit("error", err);
+    }
   });
 
   socket.on("removeParticipants", async (data) => {
     try {
       io.to(data["participant"]).emit("removeInvitation", { data });
-    } catch (error) {}
+    } catch (error) {
+      io.to(socket.id).emit("error", err);
+    }
+  });
+
+  socket.on("acceptInvitation", async (data) => {
+    try {
+      io.to(data["roomId"]).emit("invitationAccepted", { data });
+    } catch (error) {
+      io.to(socket.id).emit("error", err);
+    }
+  });
+
+  socket.on("rejectInvitation", async (data) => {
+    try {
+      io.to(data["roomId"]).emit("invitationRejected", { data });
+    } catch (error) {
+      io.to(socket.id).emit("error", err);
+    }
   });
 
   socket.on("joinRoom", async ({ roomId }) => {
