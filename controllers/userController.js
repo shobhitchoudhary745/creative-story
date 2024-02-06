@@ -335,7 +335,7 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
 // });
 
 exports.getAllUser = catchAsyncError(async (req, res, next) => {
-  const users = await userModel.find({ _id: { $ne: req.userId } }).lean();
+  const users = await userModel.find({ _id: { $ne: req.userId },type:"User" }).lean();
   res.status(200).send({
     success: true,
     length: users.length,
