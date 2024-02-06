@@ -394,6 +394,14 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       },
       message,
     });
+    if (room.chats.length % 2 == 0) {
+      if (room.currentTurn == room.numberOfRounds) {
+        room.currentTurn = 1;
+        room.currentRound < room.numberOfRounds ? (room.currentRound += 1):"";
+      } else {
+        room.currentTurn += 1;
+      }
+    }
     await room.save();
   } else {
     res.status(400).json({
@@ -438,6 +446,12 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
       }
     } else {
       room.currentTurn += 1;
+    }
+    if (room.chats.length % 2 == 0) {
+      room.chats.push({});
+      room.chats.push({});
+    } else {
+      room.chats.push({});
     }
     await room.save();
   } else {
