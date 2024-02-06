@@ -82,11 +82,20 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("message", async ({ roomId, message, senderId }) => {
+  socket.on("message", async (data) => {
     try {
-      io.to(roomId).emit("sendMessage", { message, senderId });
+      io.to(data["roomId"]).emit("sendMessage", {
+        message: data["message"],
+        senderId: data["senderId"],
+      });
       // io.emit("welcome",{message:"hello Ansh from server"})
       console.log(roomId, message, senderId);
+    } catch (error) {}
+  });
+
+  socket.on("escapeTurn", async (data) => {
+    try {
+      io.to(data["roomId"]).emit("turnIsEscaped", data);
     } catch (error) {}
   });
 
