@@ -101,7 +101,7 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
       { $pull: { notifications: roomDetails._id } },
       { new: true }
     );
-    return next(new ErrorHandler("Room not found",400))
+    return next(new ErrorHandler("Room not found", 400));
   }
   if (roomDetails.status != "upcoming") {
     return next(new ErrorHandler("Story is ongoing or completed", 400));
@@ -331,6 +331,8 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   await invitationsModel.deleteMany({ room: roomId });
 
   room.status = "active";
+  room.currentTurn = 1;
+  room.currentRound = 1;
   let temp = [];
   for (let data of room.participants) {
     if (data.invitationAccepted) {
@@ -419,6 +421,36 @@ exports.getChat = catchAsyncError(async (req, res, next) => {
     message: "Chat found",
     success: true,
     chats: room.chats,
+  });
+});
+
+exports.escapeSequence = catchAsyncError(async (req, res, next) => {
+  const room = await storyRoomModel.findById(req.params.roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room Not Found", 404));
+  }
+
+  if (room.status === "active" && room.host == req.userId) {
+    if (room.currentTurn == room.participants.length) {
+      room.currentTurn = 1;
+      if (room.currentRound < room.numberOfRounds) {
+        room.currentRound += 1;
+      }
+    } else {
+      room.currentTurn += 1;
+    }
+    await room.save();
+  } else {
+    res.status(400).json({
+      success: false,
+      message: "You do not have Access",
+    });
+  }
+
+  res.status(200).json({
+    status: 200,
+    success: true,
+    message: "Sequence Escaped Succesfully",
   });
 });
 

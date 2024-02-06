@@ -30,14 +30,16 @@ const storyRoomSchema = new mongoose.Schema(
         },
       },
     ],
-    genreId:{
+    genreId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:"Genres"
+      ref: "Genres",
     },
-    acceptedInvitation:[{
-      type:String,
-      ref:"User"
-    }],
+    acceptedInvitation: [
+      {
+        type: String,
+        ref: "User",
+      },
+    ],
     numberOfRounds: {
       type: Number,
       required: [true, "Please Enter NumberOfRounds"],
@@ -48,21 +50,29 @@ const storyRoomSchema = new mongoose.Schema(
     },
     chats: [
       {
-        sender: { 
-          senderId:{
+        sender: {
+          senderId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref:"User"
+            ref: "User",
           },
-          senderName:{
-            type:String
+          senderName: {
+            type: String,
           },
-          senderProfileUrl:{
-            type:String
-          }
-         },
+          senderProfileUrl: {
+            type: String,
+          },
+        },
         message: { type: String },
       },
     ],
+    currentTurn: {
+      type: Number,
+      default: 0,
+    },
+    currentRound: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
