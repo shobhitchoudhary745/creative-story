@@ -73,6 +73,10 @@ const storyRoomSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    currentUser: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );
