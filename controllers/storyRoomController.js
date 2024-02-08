@@ -333,6 +333,7 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   room.status = "active";
   room.currentTurn = 1;
   room.currentRound = 1;
+  room.currentUser = room.acceptedInvitation[0];
   let temp = [];
   for (let data of room.participants) {
     if (data.invitationAccepted) {
