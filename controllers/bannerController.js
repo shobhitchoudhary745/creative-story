@@ -81,7 +81,7 @@ exports.updateBanner = catchAsyncError(async (req, res, next) => {
   }
   if (navigationUrl) banner.navigationUrl = navigationUrl;
   if (clientName) banner.clientName = clientName;
-  if (location) banner.location = location;
+  if (location) banner.bannerUrl = location;
   await banner.save();
   res.status(200).json({
     success: true,
