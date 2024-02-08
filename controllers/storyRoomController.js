@@ -397,11 +397,11 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
     if (room.chats.length % 2 == 0) {
       if (room.currentTurn == room.numberOfRounds) {
         room.currentTurn = 1;
-        room.currentUser = room.invitationAccepted[room.currentTurn-1];
-        room.currentRound < room.numberOfRounds ? (room.currentRound += 1):"";
+        room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
+        room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
       } else {
         room.currentTurn += 1;
-        room.currentUser = room.invitationAccepted[room.currentTurn-1];
+        room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       }
     }
     await room.save();
@@ -443,13 +443,13 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
   if (room.status === "active" && room.host == req.userId) {
     if (room.currentTurn == room.participants.length) {
       room.currentTurn = 1;
-      room.currentUser = room.invitationAccepted[room.currentTurn-1];
+      room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       if (room.currentRound < room.numberOfRounds) {
         room.currentRound += 1;
       }
     } else {
       room.currentTurn += 1;
-      room.currentUser = room.invitationAccepted[room.currentTurn-1];
+      room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
     }
     if (room.chats.length % 2 == 0) {
       room.chats.push({});
@@ -520,6 +520,9 @@ exports.removeParticipant = catchAsyncError(async (req, res, next) => {
 
   room.participants = room.participants.filter(
     (data) => data._id != participant
+  );
+  room.acceptedInvitation = room.acceptedInvitation.filter(
+    (data) => data != participant
   );
   await room.save();
 
