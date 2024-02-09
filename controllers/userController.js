@@ -2,7 +2,7 @@ const userModel = require("../models/userModel");
 const notificationsModel = require("../models/notificationsModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
-const {sendEmail} = require("../utils/email");
+const { sendEmail } = require("../utils/email");
 const { s3Uploadv2, deleteFile } = require("../utils/s3");
 const storyRoomModel = require("../models/storyRoomModel");
 const jwt = require("jsonwebtoken");
@@ -96,10 +96,12 @@ exports.register = catchAsyncError(async (req, res, next) => {
   const notifications = await notificationsModel.create({
     owner,
   });
-  const invitations = await invitationModel.find({userEmail:email});
-  invitations.map(invitation=>notifications.notifications.push(invitation.room));
+  const invitations = await invitationModel.find({ userEmail: email });
+  invitations.map((invitation) =>
+    notifications.notifications.push(invitation.room)
+  );
   await notifications.save();
-  await invitationModel.deleteMany({userEmail:email});
+  await invitationModel.deleteMany({ userEmail: email });
   const options = {
     email: email.toLowerCase(),
     subject: "Email Verification",
@@ -110,11 +112,13 @@ exports.register = catchAsyncError(async (req, res, next) => {
 });
 
 exports.login = catchAsyncError(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, fireBaseToken } = req.body;
   if (!email || !password)
     return next(new ErrorHandler("Please enter your email and password", 400));
 
-  const user = await userModel.findOne({ email:email.toLowerCase() }).select("+password");
+  const user = await userModel
+    .findOne({ email: email.toLowerCase() })
+    .select("+password");
   if (!user) {
     return next(new ErrorHandler("Invalid email or password", 401));
   }
@@ -125,6 +129,12 @@ exports.login = catchAsyncError(async (req, res, next) => {
   if (!user.isEmailVerfied) {
     return next(new ErrorHandler("Verify Your Email before login.", 403));
   }
+
+  if (user.fireBaseToken) {
+    user.fireBaseToken = fireBaseToken;
+    await user.save();
+  }
+
   sendData(user, 200, res);
 });
 
@@ -335,7 +345,9 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
 // });
 
 exports.getAllUser = catchAsyncError(async (req, res, next) => {
-  const users = await userModel.find({ _id: { $ne: req.userId },type:"User" }).lean();
+  const users = await userModel
+    .find({ _id: { $ne: req.userId }, type: "User" })
+    .lean();
   res.status(200).send({
     success: true,
     length: users.length,
@@ -379,27 +391,25 @@ exports.authentication = async (req, res, next) => {
         },
       });
     }
-   
+
     const { userId } = jwt.verify(
       req.headers.authorization.split(" ")[1],
       process.env.JWT_SECRET
     );
     const user = await userModel.findById(userId);
-    if(!user){
+    if (!user) {
       return res.status(400).send({
-        authentication:false,
-        success:false,
-        message:"User not found"
-      })
+        authentication: false,
+        success: false,
+        message: "User not found",
+      });
     }
 
     res.status(200).send({
-      authentication:true,
-      success:true,
-      message:"User found"
-    })
-    
-    
+      authentication: true,
+      success: true,
+      message: "User found",
+    });
   } catch (error) {
     return res.status(401).send({ error: { message: `Unauthorized` } });
   }

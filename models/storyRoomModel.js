@@ -62,7 +62,8 @@ const storyRoomSchema = new mongoose.Schema(
             type: String,
           },
         },
-        message: { type: String },
+        firstMessage: { type: String },
+        secondMessage: {type: String}
       },
     ],
     currentTurn: {

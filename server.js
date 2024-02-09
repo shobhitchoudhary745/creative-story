@@ -1,6 +1,19 @@
 const app = require("./app");
 const connectDatabase = require("./config/database");
 connectDatabase();
+
+
+// import serverKey from "../serverUtills/dv91e6f-firebase-adminsdk-8mq6c-31b929065d.json" assert { type: "json" };
+// let fcm = new FCM(serverKey);
+
+
+// fcm.send(message, function (err, response) {
+//   if (err) {
+//     return res.status(404).send({ error: { message: "Something went wrong" } });
+//   } else {
+//     return res.status(200).send({ data: { message: "Sent" } });
+//   }
+// });
 // const cluster = require("cluster");
 // const totalCpus = require("os").cpus();
 // cluster.schedulingPolicy = cluster.SCHED_RR;

@@ -387,15 +387,34 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
   }
   // console.log(room)
   if (room.status === "active") {
-    room.chats.push({
-      sender: {
-        senderId: req.userId,
-        senderName: req.user.userName,
-        senderProfileUrl: req.user.profileUrl,
-      },
-      message,
-    });
-    if (room.chats.length % 2 == 0) {
+    if (room.chats.length == 0) {
+      room.chats.push({
+        sender: {
+          senderId: req.userId,
+          senderName: req.user.userName,
+          senderProfileUrl: req.user.profileUrl,
+        },
+        firstMessage: message,
+        secondMessage:""
+      });
+    } else if (
+      room.chats[room.chats.length - 1].secondMessage ||
+      room.chats[room.chats.length - 1].secondMessage == null
+    ) {
+      room.chats.push({
+        sender: {
+          senderId: req.userId,
+          senderName: req.user.userName,
+          senderProfileUrl: req.user.profileUrl,
+        },
+        firstMessage: message,
+        secondMessage:""
+      });
+    } else {
+      room.chats[room.chats.length - 1].secondMessage = message;
+    }
+
+    if (room.chats[room.chats.length - 1].secondMessage) {
       if (room.currentTurn == room.numberOfRounds) {
         room.currentTurn = 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
@@ -452,11 +471,13 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
       room.currentTurn += 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
     }
-    if (room.chats.length % 2 == 0) {
-      room.chats.push({});
-      room.chats.push({});
+    if (
+      room.chats[room.chats.length - 1].secondMessage ||
+      room.chats[room.chats.length - 1].secondMessage == null
+    ) {
+      room.chats.push({ firstMessaage: null, secondMessage: null });
     } else {
-      room.chats.push({});
+      room.chats[room.chats.length - 1].secondMessage = null;
     }
     await room.save();
   } else {

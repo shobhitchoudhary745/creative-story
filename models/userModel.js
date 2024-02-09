@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please Enter Your Email"],
       unique: true,
-      lowercase:true
+      lowercase: true,
     },
     password: {
       type: String,
@@ -21,54 +21,55 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please enter your firstname."],
       maxLength: [25, "Name cannot exceed 25 characters"],
       minLength: [4, "Name should have more that 4 characters"],
-      
     },
     lastName: {
       type: String,
       required: [true, "Please enter your firstname."],
       maxLength: [25, "Name cannot exceed 25 characters"],
       minLength: [4, "Name should have more that 4 characters"],
-      
     },
     userName: {
       type: String,
       required: [true, "Please enter your username."],
       maxLength: [25, "Name cannot exceed 25 characters"],
       minLength: [4, "Name should have more that 4 characters"],
-      unique:true
+      unique: true,
     },
-    profileUrl:{
-      type:String,
-      default:"https://tse4.mm.bing.net/th?id=OIP.eXWcaYbEtO2uuexHM8sAwwHaHa&pid=Api&P=0&h=180"
+    profileUrl: {
+      type: String,
+      default:
+        "https://tse4.mm.bing.net/th?id=OIP.eXWcaYbEtO2uuexHM8sAwwHaHa&pid=Api&P=0&h=180",
     },
     mobile_no: {
       type: String,
       required: [true, "Mobile number is required."],
     },
+    fireBaseToken: {
+      type: String,
+    },
     gender: {
       type: String,
-      enum:{
-        values:["Male","Female","Other"],
-        message:"Invalid value. Hint: valid inputs- Male,Female,Others"
+      enum: {
+        values: ["Male", "Female", "Other"],
+        message: "Invalid value. Hint: valid inputs- Male,Female,Others",
       },
       required: [true, "Gender is required"],
     },
-    otp:{
-      type:Number,
-      default:0
+    otp: {
+      type: Number,
+      default: 0,
     },
-    isEmailVerfied:{
-      type:Boolean,
-      default:false
+    isEmailVerfied: {
+      type: Boolean,
+      default: false,
     },
-    type:{
-      type:String,
-      default:"User"
-    }
+    type: {
+      type: String,
+      default: "User",
+    },
   },
   { timestamps: true }
 );
-
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) next();
