@@ -130,7 +130,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Verify Your Email before login.", 403));
   }
 
-  if (user.fireBaseToken) {
+  if (fireBaseToken) {
     user.fireBaseToken = fireBaseToken;
     await user.save();
   }
