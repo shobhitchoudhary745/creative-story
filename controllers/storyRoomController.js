@@ -5,30 +5,30 @@ const invitationsModel = require("../models/invitationModel");
 const ErrorHandler = require("../utils/errorHandler");
 const { sendInvitationEmail } = require("../utils/email");
 
-const { firebase } = require("../utils/firebase");
-const messaging = firebase.messaging();
+// const { firebase } = require("../utils/firebase");
+// const messaging = firebase.messaging();
 // const genreModel = require("../models/genreModel");
 
 exports.sendDummyToken = catchAsyncError(async (req, res, next) => {
   // const { firebaseToken } = req.body;
 
-  const message = {
-    notification: {
-      title: "Hello from FCM!",
-      body: "This is a test message from FCM.",
-    },
-    token:
-      "dtiXgoPjQkqouyIocbOZCj:APA91bH-ND3JFseNovkDlEdExO_DbmNoEEG-fRG1mlpDdrpI77soYk_oDOVJByL-PoJUDnq_Om6YkW1vqvwr5h8oulqd_yBHL59pob38sxY2BZv-23YONJmYP-Jw5DG-u_0UoRhbs9tr",
-  };
+  // const message = {
+  //   notification: {
+  //     title: "Hello from FCM!",
+  //     body: "This is a test message from FCM.",
+  //   },
+  //   token:
+  //     "dtiXgoPjQkqouyIocbOZCj:APA91bH-ND3JFseNovkDlEdExO_DbmNoEEG-fRG1mlpDdrpI77soYk_oDOVJByL-PoJUDnq_Om6YkW1vqvwr5h8oulqd_yBHL59pob38sxY2BZv-23YONJmYP-Jw5DG-u_0UoRhbs9tr",
+  // };
 
-  messaging
-    .send(message)
-    .then((response) => {
-      res.status(200).send(response);
-    })
-    .catch((error) => {
-      res.status(400).send(error);
-    });
+  // messaging
+  //   .send(message)
+  //   .then((response) => {
+  //     res.status(200).send(response);
+  //   })
+  //   .catch((error) => {
+  //     res.status(400).send(error);
+  //   });
 });
 
 exports.createRoom = catchAsyncError(async (req, res, next) => {
