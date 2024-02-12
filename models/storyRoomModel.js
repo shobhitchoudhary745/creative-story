@@ -75,8 +75,8 @@ const storyRoomSchema = new mongoose.Schema(
       default: 0,
     },
     currentUser: {
-      type: String,
-      default: "",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   { timestamps: true }

@@ -14,6 +14,7 @@ const {
   addParticipants,
   removeParticipant,
   escapeSequence,
+  sendDummyToken,
 } = require("../controllers/storyRoomController");
 const { auth } = require("../middlewares/auth");
 const router = express.Router();
@@ -32,4 +33,5 @@ router.get("/get-chats/:roomId", auth, getChat);
 router.patch("/add-participants/:roomId", auth, addParticipants);
 router.patch("/remove-participants/:roomId", auth, removeParticipant);
 router.patch("/escape-sequence/:roomId", auth, escapeSequence);
+router.post("/push-notification", sendDummyToken);
 module.exports = router;
