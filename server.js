@@ -2,10 +2,8 @@ const app = require("./app");
 const connectDatabase = require("./config/database");
 connectDatabase();
 
-
 // import serverKey from "../serverUtills/dv91e6f-firebase-adminsdk-8mq6c-31b929065d.json" assert { type: "json" };
 // let fcm = new FCM(serverKey);
-
 
 // fcm.send(message, function (err, response) {
 //   if (err) {
@@ -26,64 +24,8 @@ const users = {};
 const rooms = {};
 
 io.on("connection", (socket) => {
-  io.emit("welcome", { data: "welcome Ansh from server" });
-  console.log("socket id:", socket.id);
-
-  socket.on("createStory", async (data) => {
-    try {
-      for (let user of data["participants"]) {
-        io.to(user["_id"]).emit("storyInvitation", { data });
-      }
-    } catch (error) {
-      io.to(socket.id).emit("error", err);
-    }
-  });
-
-  socket.on("addParticipants", async (data) => {
-    try {
-      for (let user of data["participants"]) {
-        io.to(user["_id"]).emit("addRequest", { data });
-      }
-    } catch (error) {
-      io.to(socket.id).emit("error", err);
-    }
-  });
-
-  socket.on("removeParticipants", async (data) => {
-    try {
-      io.to(data["participant"]).emit("removeInvitation", { data });
-    } catch (error) {
-      io.to(socket.id).emit("error", err);
-    }
-  });
-
-  socket.on("acceptInvitation", async (data) => {
-    try {
-      io.to(data["roomId"]).emit("invitationAccepted", { data });
-    } catch (error) {
-      io.to(socket.id).emit("error", err);
-    }
-  });
-
-  socket.on("rejectInvitation", async (data) => {
-    try {
-      io.to(data["roomId"]).emit("invitationRejected", { data });
-    } catch (error) {
-      io.to(socket.id).emit("error", err);
-    }
-  });
-
-  socket.on("joinRoom", async ({ roomId }) => {
-    try {
-      rooms[users[socket.id]] = [];
-      rooms[users[socket.id]].push(roomId);
-      socket.join(roomId);
-    } catch (err) {
-      console.log(err);
-      io.to(socket.id).emit("error", err);
-    }
-  });
   socket.on("login", async ({ id }) => {
+    // console.log(User Id after login ===>>>${id})
     try {
       socket.join(id); //personal message
       io.to(id).emit("loginSuccessfully", { message: "Welcome User", id });
@@ -95,30 +37,84 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("message", async (data) => {
+  socket.on("createStory", async (data) => {
+    rooms[socket.id] = [];
+    rooms[socket.id].push(data["roomId"]);
+    socket.join(data["roomId"]);
+    console.log(data["hostname"]);
+    console.log("user created room id: ", data["roomId"]);
     try {
-      io.to(data["roomId"]).emit("sendMessage", {
-        message: data["message"],
-        senderId: data["senderId"],
-      });
-      // io.emit("welcome",{message:"hello Ansh from server"})
-      console.log(roomId, message, senderId);
+      for (let user of data["participants"]) {
+        io.to(user["_id"]).emit("storyInvitation", { data });
+      }
+    } catch (error) {}
+  });
+
+  socket.on("joinRoom", async (data) => {
+    try {
+      for (let room of data["rooms"]) {
+        console.log(room);
+        socket.join(room);
+      }
+    } catch (error) {}
+  });
+
+  socket.on("addParticipants", async (data) => {
+    try {
+      for (let user of data["participants"]) {
+        io.to(user["_id"]).emit("storyInvitation", { data });
+      }
+    } catch (error) {}
+  });
+
+  socket.on("removeParticipants", async (data) => {
+    try {
+      io.to(data["participant"]).emit("removeInvitation", { data });
+    } catch (error) {}
+  });
+
+  socket.on("acceptInvitation", async (data) => {
+    const roomId = data["roomId"];
+    console.log("user acceptInvitation room id: ", data["roomId"]);
+    socket.join(data["roomId"]);
+    try {
+      console.log(io.sockets.adapter.rooms.has(roomId));
+      io.to(data["roomId"]).emit("invitationAccepted", { roomId });
+    } catch (error) {
+      console.log("error in invitaion accept emit: ", error);
+    }
+  });
+
+  socket.on("rejectInvitation", async (data) => {
+    const roomId = data["roomId"];
+    console.log("user rejectInvitation room id: ", data["roomId"]);
+    try {
+      io.to(data["roomId"]).emit("invitationRejected", { roomId });
+    } catch (error) {
+      io.to(socket.id).emit("error", err);
+    }
+  });
+
+  socket.on("startStory", async (data) => {
+    const roomId = data["roomId"];
+    try {
+      io.to(data["roomId"]).emit("storyStarted", { roomId });
+    } catch (error) {}
+  });
+
+  socket.on("sendMessage", async (data) => {
+    console.log("user send a messge in room: ", data["roomId"]);
+    const roomId = data["roomId"];
+    try {
+      io.to(roomId).emit("messageSend", { roomId });
     } catch (error) {}
   });
 
   socket.on("escapeTurn", async (data) => {
+    const roomId = data["roomId"];
     try {
-      io.to(data["roomId"]).emit("turnIsEscaped", data);
+      io.to(roomId).emit("turnIsEscaped", { roomId });
     } catch (error) {}
-  });
-
-  socket.on("disconnect", async ({ id }) => {
-    console.log("user is disconnected: ", socket.id);
-    // for(let i of rooms[users[socket.id]]){
-    //   io.to(i).emit("user-left",{})
-    // }
-    // delete users[socket.id];
-    // console.log(users);
   });
 });
 
