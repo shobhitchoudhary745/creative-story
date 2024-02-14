@@ -252,8 +252,22 @@ exports.submitOtpForEmailVerification = catchAsyncError(
       user.otp = 0;
       user.isEmailVerfied = true;
       await user.save();
+      const token = await user.getJWTToken();
+      const newUser = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        mobile_no: user.mobile_no,
+        gender: user.gender,
+        isEmailVerfied: user.isEmailVerfied,
+        _id: user._id,
+        userName: user.userName,
+        profileUrl: user.profileUrl,
+      };
       res.status(202).send({
         status: 202,
+        token,
+        user:newUser,
         success: true,
         message: "Email Verified Successfully!",
       });
