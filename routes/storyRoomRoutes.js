@@ -15,12 +15,14 @@ const {
   removeParticipant,
   escapeSequence,
   sendDummyToken,
+  getGameDetails,
 } = require("../controllers/storyRoomController");
 const { auth } = require("../middlewares/auth");
 const router = express.Router();
 
 router.post("/createRoom", auth, createRoom);
 router.get("/getRoomDetails/:roomId", auth, getRoomDetails);
+router.get("/getGameDetails/:roomId", auth, getGameDetails);
 router.get("/my_stories", auth, getMyStories);
 router.get("/active_stories", auth, getActiveStories);
 router.get("/upcoming_stories", auth, getUpcomingStories);

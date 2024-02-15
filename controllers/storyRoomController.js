@@ -587,3 +587,21 @@ exports.removeParticipant = catchAsyncError(async (req, res, next) => {
     room,
   });
 });
+
+exports.getGameDetails = catchAsyncError(async (req, res, next) => {
+  const { roomId } = req.params;
+  const roomDetails = await storyRoomModel
+    .findById(roomId)
+    .populate("host", "userName profileUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
+    .populate("participants._id", "userName profileUrl")
+    .populate("currentUser", "userName profileUrl")
+    .lean();
+
+  res.status(200).send({
+    status: 200,
+    success: true,
+    data: roomDetails,
+    message: "room Details",
+  });
+});
