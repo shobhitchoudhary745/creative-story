@@ -98,19 +98,23 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     .lean();
 
   delete populatedRoom.chats;
-
+  // console.log(fcmTokenArray);
   if (fcmTokenArray.length) {
-    const message = {
-      notification: {
-        title: "Story Room Invitation",
-        body: "You've been invited to join a story room! Accept or decline now.",
-      },
-      token: fcmTokenArray,
-      data: {
-        type: "request",
-      },
-    };
-    await messaging.send(message);
+    for (let token of fcmTokenArray) {
+      const message = {
+        notification: {
+          title: "Story Room Invitation",
+          body: "You've been invited to join a story room! Accept or decline now.",
+        },
+        token,
+        data: {
+          type: "request",
+        },
+      };
+      await messaging.send(message);
+    }
+
+    // await Promise.all(promise);
   }
   // populatedRoom.colour = genre.colour;
   res.status(201).send({
@@ -435,18 +439,22 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
   }
 
   if (tokenArray.length) {
-    const message = {
-      notification: {
-        title: "Game End",
-        body: "The story game has ended. Check out the completed story card!",
-      },
-      token: tokenArray,
-      data: {
-        type: "card",
-        room,
-      },
-    };
-    await messaging.send(message);
+    if (tokenArray.length) {
+      for (let token of tokenArray) {
+        const message = {
+          notification: {
+            title: "Game End",
+            body: "The story game has ended. Check out the completed story card!",
+          },
+          token,
+          data: {
+            type: "card",
+            room: JSON.stringify(room),
+          },
+        };
+        await messaging.send(message);
+      }
+    }
   }
 
   res.status(200).json({
@@ -512,7 +520,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
         token: user.fireBaseToken,
         data: {
           type: "chat",
-          room,
+          room:JSON.stringify(room),
         },
       };
       await messaging.send(message);
@@ -583,7 +591,7 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
         token: user.fireBaseToken,
         data: {
           type: "chat",
-          room,
+          room:JSON.stringify(room),
         },
       };
       await messaging.send(message);
