@@ -441,7 +441,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
     }
 
     if (room.chats[room.chats.length - 1].secondMessage) {
-      if (room.currentTurn == room.numberOfRounds) {
+      if (room.currentTurn == room.acceptedInvitation.length) {
         room.currentTurn = 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
         room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
