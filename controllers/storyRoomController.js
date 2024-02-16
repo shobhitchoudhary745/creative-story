@@ -2,16 +2,16 @@ const notificationsModel = require("../models/notificationsModel");
 const storyRoomModel = require("../models/storyRoomModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const invitationsModel = require("../models/invitationModel");
+const userModel = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const { sendInvitationEmail } = require("../utils/email");
 
-// const { firebase } = require("../utils/firebase");
-// const messaging = firebase.messaging();
+const { firebase } = require("../utils/firebase");
+const messaging = firebase.messaging();
 // const genreModel = require("../models/genreModel");
 
 exports.sendDummyToken = catchAsyncError(async (req, res, next) => {
   // const { firebaseToken } = req.body;
-
   // const message = {
   //   notification: {
   //     title: "Hello from FCM!",
@@ -20,7 +20,6 @@ exports.sendDummyToken = catchAsyncError(async (req, res, next) => {
   //   token:
   //     "dtiXgoPjQkqouyIocbOZCj:APA91bH-ND3JFseNovkDlEdExO_DbmNoEEG-fRG1mlpDdrpI77soYk_oDOVJByL-PoJUDnq_Om6YkW1vqvwr5h8oulqd_yBHL59pob38sxY2BZv-23YONJmYP-Jw5DG-u_0UoRhbs9tr",
   // };
-
   // messaging
   //   .send(message)
   //   .then((response) => {
@@ -65,6 +64,16 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     );
   });
 
+  const invitations = participants.slice(1).map((userId) => {
+    return userModel.findById(userId);
+  });
+
+  const users = await Promise.all(invitations);
+  const fcmTokenArray = [];
+  for (let user of users) {
+    if (user.fireBaseToken) fcmTokenArray.push(user.fireBaseToken);
+  }
+
   const updatedNotifications = await Promise.all(notificationPromises);
   // console.log(updatedNotifications);
   if (userInvitations.length > 0) {
@@ -89,6 +98,20 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     .lean();
 
   delete populatedRoom.chats;
+
+  if (fcmTokenArray.length) {
+    const message = {
+      notification: {
+        title: "Story Room Invitation",
+        body: "You've been invited to join a story room! Accept or decline now.",
+      },
+      token: fcmTokenArray,
+      data: {
+        type: "request",
+      },
+    };
+    await messaging.send(message);
+  }
   // populatedRoom.colour = genre.colour;
   res.status(201).send({
     status: 201,
@@ -397,7 +420,34 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
   }
 
   room.status = "completed";
+  const promise = room.participants.slice(1).map((userId) => {
+    return userModel.findById(userId);
+  });
+
   await room.save();
+
+  const users = await Promise.all(promise);
+  const tokenArray = [];
+  for (let user of users) {
+    if (user.fireBaseToken) {
+      tokenArray.push(user.fireBaseToken);
+    }
+  }
+
+  if (tokenArray.length) {
+    const message = {
+      notification: {
+        title: "Game End",
+        body: "The story game has ended. Check out the completed story card!",
+      },
+      token: tokenArray,
+      data: {
+        type: "card",
+        room,
+      },
+    };
+    await messaging.send(message);
+  }
 
   res.status(200).json({
     status: 200,
@@ -445,13 +495,28 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
         room.currentTurn = 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
         // room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
-        room.currentRound+=1;
+        room.currentRound += 1;
       } else {
         room.currentTurn += 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       }
     }
     await room.save();
+    const user = await userModel.findById(room.currentUser);
+    if (user.fireBaseToken) {
+      const message = {
+        notification: {
+          title: "Game Start",
+          body: "The story room has started! It's your turn to contribute.",
+        },
+        token: user.fireBaseToken,
+        data: {
+          type: "chat",
+          room,
+        },
+      };
+      await messaging.send(message);
+    }
   } else {
     res.status(400).json({
       success: false,
@@ -488,11 +553,12 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
   }
 
   if (room.status === "active" && room.host == req.userId) {
+    const userId = room.currentUser;
     if (room.currentTurn == room.participants.length) {
       room.currentTurn = 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       // if (room.currentRound < room.numberOfRounds) {
-        room.currentRound += 1;
+      room.currentRound += 1;
       // }
     } else {
       room.currentTurn += 1;
@@ -507,6 +573,21 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
       room.chats[room.chats.length - 1].secondMessage = null;
     }
     await room.save();
+    const user = await userModel.findById(userId);
+    if (user.fireBaseToken) {
+      const message = {
+        notification: {
+          title: "Participant Skipped",
+          body: "You've been skipped! It's okay, catch the next turn.",
+        },
+        token: user.fireBaseToken,
+        data: {
+          type: "chat",
+          room,
+        },
+      };
+      await messaging.send(message);
+    }
   } else {
     res.status(400).json({
       success: false,
