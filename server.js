@@ -38,6 +38,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("createStory", async (data) => {
+    let i = 0;
     rooms[socket.id] = [];
     rooms[socket.id].push(data["roomId"]);
     socket.join(data["roomId"]);
@@ -45,6 +46,10 @@ io.on("connection", (socket) => {
     console.log("user created room id: ", data["roomId"]);
     try {
       for (let user of data["participants"]) {
+        if (i == 0) {
+          i += 1;
+          continue;
+        }
         io.to(user["_id"]).emit("storyInvitation", { data });
       }
     } catch (error) {}
