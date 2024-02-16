@@ -444,7 +444,8 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       if (room.currentTurn == room.acceptedInvitation.length) {
         room.currentTurn = 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
-        room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
+        // room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
+        room.currentRound+=1;
       } else {
         room.currentTurn += 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
@@ -490,9 +491,9 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     if (room.currentTurn == room.participants.length) {
       room.currentTurn = 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
-      if (room.currentRound < room.numberOfRounds) {
+      // if (room.currentRound < room.numberOfRounds) {
         room.currentRound += 1;
-      }
+      // }
     } else {
       room.currentTurn += 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];

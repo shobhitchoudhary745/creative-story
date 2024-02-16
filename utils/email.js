@@ -13,13 +13,14 @@ const sendEmail = async (options) => {
     });
 
     await transporter.sendMail({
-      from: "Shobhit Choudhary <shobhitchoudhary745@gmail.com>",
+      from: "Keep It Going <keepitgoingstory@gmail.com>",
       to: options.email,
       subject: options.subject,
       html: options.html,
     });
     return true;
   } catch (error) {
+    console.log(error)
     return false;
   }
 };
