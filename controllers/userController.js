@@ -44,6 +44,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     mobile,
     country_code,
     gender,
+    fireBaseToken
   } = req.body;
   let mobile_no = "+1 ";
   if (country_code && country_code.trim()) {
@@ -91,6 +92,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     gender,
     otp,
     userName,
+    fireBaseToken
   });
   const owner = user._id;
   const notifications = await notificationsModel.create({
