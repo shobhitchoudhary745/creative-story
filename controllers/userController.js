@@ -44,7 +44,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     mobile,
     country_code,
     gender,
-    fireBaseToken
+    fireBaseToken,
   } = req.body;
   let mobile_no = "+1 ";
   if (country_code && country_code.trim()) {
@@ -92,7 +92,7 @@ exports.register = catchAsyncError(async (req, res, next) => {
     gender,
     otp,
     userName,
-    fireBaseToken
+    fireBaseToken,
   });
   const owner = user._id;
   const notifications = await notificationsModel.create({
@@ -107,7 +107,20 @@ exports.register = catchAsyncError(async (req, res, next) => {
   const options = {
     email: email.toLowerCase(),
     subject: "Email Verification",
-    html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
+    html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
+
+    <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+      <h1 style="color: #333333;">Account Verification Code</h1>
+      <p style="color: #666666;">Your verification code is:</p>
+      <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">${otp}</p>
+      <p style="color: #666666;">Use this code to verify your Account</p>
+    </div>
+
+    <div style="color: #888888;">
+      <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team String Geo</span></p>
+    </div>
+  
+  </div>`,
   };
   await sendEmail(options);
   sendData(user, 201, res, "register");
@@ -173,7 +186,20 @@ exports.getOtpToForgotPassword = catchAsyncError(async (req, res, next) => {
   const options = {
     email: email.toLowerCase(),
     subject: "Forgot Password Request",
-    html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
+    html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
+
+    <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+      <h1 style="color: #333333;">Forgot Password Code</h1>
+      <p style="color: #666666;">Your one time code is:</p>
+      <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">${otp}</p>
+      <p style="color: #666666;">Use this code to Forgot your Password</p>
+    </div>
+
+    <div style="color: #888888;">
+      <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team String Geo</span></p>
+    </div>
+  
+  </div>`,
   };
   const send = await sendEmail(options);
   if (send) {
@@ -269,7 +295,7 @@ exports.submitOtpForEmailVerification = catchAsyncError(
       res.status(202).send({
         status: 202,
         token,
-        user:newUser,
+        user: newUser,
         success: true,
         message: "Email Verified Successfully!",
       });
@@ -389,7 +415,20 @@ exports.resendOtp = catchAsyncError(async (req, res, next) => {
   const options = {
     email: email.toLowerCase(),
     subject: "Email Verification",
-    html: `<p>Your one time OTP password is <b>${otp}</b>.</p>`,
+    html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
+
+    <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+      <h1 style="color: #333333;">Account Verification Code</h1>
+      <p style="color: #666666;">Your verification code is:</p>
+      <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">${otp}</p>
+      <p style="color: #666666;">Use this code to verify your Account</p>
+    </div>
+
+    <div style="color: #888888;">
+      <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team String Geo</span></p>
+    </div>
+  
+  </div>`,
   };
   await sendEmail(options);
   res.status(200).send({
