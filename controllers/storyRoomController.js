@@ -113,23 +113,23 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
   delete populatedRoom.chats;
   // console.log(fcmTokenArray);
-  // if (fcmTokenArray.length) {
-  //   for (let token of fcmTokenArray) {
-  //     const message = {
-  //       notification: {
-  //         title: "Story Room Invitation",
-  //         body: "You've been invited to join a story room! Accept or decline now.",
-  //       },
-  //       token,
-  //       data: {
-  //         type: "request",
-  //       },
-  //     };
-  //     await messaging.send(message);
-  //   }
+  if (fcmTokenArray.length>0) {
+    for (let token of fcmTokenArray) {
+      const message = {
+        notification: {
+          title: "Story Room Invitation",
+          body: "You've been invited to join a story room! Accept or decline now.",
+        },
+        token,
+        data: {
+          type: "request",
+        },
+      };
+      await messaging.send(message);
+    }
 
-  //   // await Promise.all(promise);
-  // }
+    // await Promise.all(promise);
+  }
   // populatedRoom.colour = genre.colour;
   res.status(201).send({
     status: 201,
