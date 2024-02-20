@@ -1,5 +1,6 @@
 const userModel = require("../models/userModel");
 const notificationsModel = require("../models/notificationsModel");
+const updatesModel = require("../models/updateModel");
 const catchAsyncError = require("../utils/catchAsyncError");
 const ErrorHandler = require("../utils/errorHandler");
 const { sendEmail } = require("../utils/email");
@@ -96,6 +97,10 @@ exports.register = catchAsyncError(async (req, res, next) => {
   });
   const owner = user._id;
   const notifications = await notificationsModel.create({
+    owner,
+  });
+
+  await updatesModel.create({
     owner,
   });
   const invitations = await invitationModel.find({ userEmail: email });

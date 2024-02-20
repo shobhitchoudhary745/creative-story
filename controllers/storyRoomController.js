@@ -7,6 +7,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const { sendInvitationEmail } = require("../utils/email");
 
 const { firebase } = require("../utils/firebase");
+const updateModel = require("../models/updateModel");
 const messaging = firebase.messaging();
 // const genreModel = require("../models/genreModel");
 
@@ -441,7 +442,15 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
     return userModel.findById(userId);
   });
 
+  const promise2 = room.participants.slice(1).map((userId) => {
+    return updateModel.findOneAndUpdate(
+      { owner: userId },
+      { $push: { updates: { type: "Story Card is Ready", data: room._id } } }
+    );
+  });
+
   await room.save();
+  await Promise.all(promise2);
 
   const users = await Promise.all(promise);
   const tokenArray = [];
@@ -524,6 +533,9 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
     }
     await room.save();
     const user = await userModel.findById(room.currentUser);
+    const update = await updateModel.findOne({ owner: user._id });
+    update.updates.push({ type: "Game Start, Its Your turn", data: room._id });
+    await update.save();
     if (user.fireBaseToken) {
       const message = {
         notification: {
@@ -595,6 +607,9 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     }
     await room.save();
     const user = await userModel.findById(userId);
+    const update = await updateModel.findOne({ owner: user._id });
+    update.updates.push({ type: "skipped", data: room._id });
+    await update.save();
     if (user.fireBaseToken) {
       const message = {
         notification: {
