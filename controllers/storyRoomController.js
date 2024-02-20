@@ -113,7 +113,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
   delete populatedRoom.chats;
   // console.log(fcmTokenArray);
-  if (fcmTokenArray.length>0) {
+  if (fcmTokenArray.length) {
     for (let token of fcmTokenArray) {
       const message = {
         notification: {
@@ -130,7 +130,6 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
     // await Promise.all(promise);
   }
-  // populatedRoom.colour = genre.colour;
   res.status(201).send({
     status: 201,
     success: true,
