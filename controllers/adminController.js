@@ -8,6 +8,7 @@ const termsAndConditionModel = require("../models/termsAndConditionModel");
 const ErrorHandler = require("../utils/errorHandler");
 const notificationsModel = require("../models/notificationsModel");
 const { s3Uploadv2 } = require("../utils/s3");
+const updateModel = require("../models/updateModel");
 
 exports.termsandcondition = catchAsyncError(async (req, res, next) => {
   const termsBody = await termsAndConditionModel.find().lean();
@@ -328,5 +329,23 @@ exports.updateGenre = catchAsyncError(async (req, res, next) => {
   res.status(200).send({
     success: true,
     genres,
+  });
+});
+
+exports.deleteAccount = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.params;
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    return next(new ErrorHandler("User Not Found", 400));
+  }
+  const isPasswordMatched = await user.comparePassword(password);
+  if (!isPasswordMatched) return next(new ErrorHandler("User Not Found", 400));
+  await userModel.findByIdAndDelete(user._id);
+  await notificationsModel.findOneAndDelete({ owner: user._id });
+  await updateModel.findOneAndDelete({ owner: user._id });
+  res.status(200).send({
+    success: true,
+    message: "Account Deleted Successfully",
   });
 });

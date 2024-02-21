@@ -444,7 +444,17 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
   const promise2 = room.participants.slice(1).map((userId) => {
     return updateModel.findOneAndUpdate(
       { owner: userId },
-      { $push: { updates: { type: "Story Card is Ready", data: room._id } } }
+      {
+        $push: {
+          updates: {
+            type: "Story Card is Ready",
+            data: room._id,
+            roomName: room.roomName,
+            createdAt: new Date(),
+          },
+        },
+        $inc: { count: 1 },
+      }
     );
   });
 
@@ -533,7 +543,13 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
     await room.save();
     const user = await userModel.findById(room.currentUser);
     const update = await updateModel.findOne({ owner: user._id });
-    update.updates.push({ type: "Game Start, Its Your turn", data: room._id });
+    update.updates.push({
+      type: "Game Start, Its Your turn",
+      data: room._id,
+      roomName: room.roomName,
+      createdAt: new Date(),
+    });
+    update.count += 1;
     await update.save();
     if (user.fireBaseToken) {
       const message = {
@@ -607,7 +623,13 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     await room.save();
     const user = await userModel.findById(userId);
     const update = await updateModel.findOne({ owner: user._id });
-    update.updates.push({ type: "skipped", data: room._id });
+    update.updates.push({
+      type: "skipped",
+      data: room._id,
+      roomName: room.roomName,
+      createdAt: new Date(),
+    });
+    update.count += 1;
     await update.save();
     if (user.fireBaseToken) {
       const message = {

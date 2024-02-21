@@ -8,7 +8,6 @@ const {
   getAllUser,
   getUser,
   updateUser,
-  deleteUser,
   updateAdminProfile,
   getStory,
   updateStory,
@@ -20,6 +19,8 @@ const {
   deleteGenre,
   getGenre,
   updateGenre,
+  deleteUser,
+  deleteAccount,
 } = require("../controllers/adminController");
 const { isAdmin, auth } = require("../middlewares/auth");
 const { upload } = require("../utils/s3");
@@ -43,6 +44,13 @@ router.put("/updateTermsAndCondition", auth, isAdmin, updateTermsAndCondition);
 router.get("/getAllGenres", auth, isAdmin, getAllGenre);
 router.delete("/deleteGenre/:id", auth, isAdmin, deleteGenre);
 router.get("/getGenre/:id", auth, isAdmin, getGenre);
-router.put("/updateGenre/:id", auth, isAdmin,upload.single("image"), updateGenre);
+router.put(
+  "/updateGenre/:id",
+  auth,
+  isAdmin,
+  upload.single("image"),
+  updateGenre
+);
+router.post("/deleteAccount", deleteAccount);
 
 module.exports = router;

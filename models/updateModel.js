@@ -14,8 +14,19 @@ const notificationsSchema = new mongoose.Schema(
         data: {
           type: String,
         },
+        roomName: {
+          type: String,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now(),
+        },
       },
     ],
+    count: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
