@@ -675,6 +675,17 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
 
   room.participants = [...room.participants, ...participants];
   await room.save();
+  const promise = participants.map((userId) => {
+    return userModel.findById(userId);
+  });
+  const users = Promise.all(promise);
+  const fcmTokenArray = [];
+  for (let user of users) {
+    if (user.fireBaseToken) {
+      fcmTokenArray.push(user.fireBaseToken);
+    }
+  }
+
   const notificationPromises = participants.map((userId) => {
     return notificationsModel.findOneAndUpdate(
       { owner: userId },
@@ -682,6 +693,24 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
       { new: true }
     );
   });
+
+  if (fcmTokenArray.length) {
+    for (let token of fcmTokenArray) {
+      const message = {
+        notification: {
+          title: "Story Room Invitation",
+          body: "You've been invited to join a story room! Accept or decline now.",
+        },
+        token,
+        data: {
+          type: "request",
+        },
+      };
+      await messaging.send(message);
+    }
+
+    // await Promise.all(promise);
+  }
 
   const updatedNotifications = await Promise.all(notificationPromises);
 
