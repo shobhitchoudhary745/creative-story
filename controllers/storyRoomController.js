@@ -527,6 +527,18 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       });
     } else {
       room.chats[room.chats.length - 1].secondMessage = message;
+    }
+
+    if (room.chats[room.chats.length - 1].secondMessage) {
+      if (room.currentTurn == room.acceptedInvitation.length) {
+        room.currentTurn = 1;
+        room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
+        // room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
+        room.currentRound += 1;
+      } else {
+        room.currentTurn += 1;
+        room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
+      }
       const user = await userModel.findById(room.currentUser);
       const update = await updateModel.findOne({ owner: user._id });
       update.updates.push({
@@ -550,18 +562,6 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
           },
         };
         await messaging.send(message);
-      }
-    }
-
-    if (room.chats[room.chats.length - 1].secondMessage) {
-      if (room.currentTurn == room.acceptedInvitation.length) {
-        room.currentTurn = 1;
-        room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
-        // room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
-        room.currentRound += 1;
-      } else {
-        room.currentTurn += 1;
-        room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       }
     }
     await room.save();
