@@ -23,11 +23,23 @@ exports.viewUpdates = catchAsyncError(async (req, res, next) => {
   });
 });
 
-exports.removeUpdates = catchAsyncError(async (req, res, next) => {
+exports.removeUpdate = catchAsyncError(async (req, res, next) => {
   const update = await updateModel.findOne({ owner: req.userId });
   if(!update) return next(new ErrorHandler("model not found",404))
   const id = req.params.id;
   update.updates = update.updates.filter((data) => data._id != id);
+  await update.save();
+  res.status(200).send({
+    status: 200,
+    success: true,
+    message: "Update Removed",
+  });
+});
+
+exports.removeUpdates = catchAsyncError(async (req, res, next) => {
+  const update = await updateModel.findOne({ owner: req.userId });
+  if(!update) return next(new ErrorHandler("model not found",404))
+  update.updates = []
   await update.save();
   res.status(200).send({
     status: 200,
