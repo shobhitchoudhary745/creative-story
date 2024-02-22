@@ -527,6 +527,30 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       });
     } else {
       room.chats[room.chats.length - 1].secondMessage = message;
+      const user = await userModel.findById(room.currentUser);
+      const update = await updateModel.findOne({ owner: user._id });
+      update.updates.push({
+        type: "Game Start, Its Your turn",
+        data: room._id,
+        roomName: room.roomName,
+        createdAt: new Date(),
+      });
+      update.count += 1;
+      await update.save();
+      if (user.fireBaseToken) {
+        const message = {
+          notification: {
+            title: "Game Start",
+            body: "The story room has started! It's your turn to contribute.",
+          },
+          token: user.fireBaseToken,
+          data: {
+            type: "chat",
+            room: JSON.stringify(room),
+          },
+        };
+        await messaging.send(message);
+      }
     }
 
     if (room.chats[room.chats.length - 1].secondMessage) {
@@ -541,30 +565,6 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       }
     }
     await room.save();
-    const user = await userModel.findById(room.currentUser);
-    const update = await updateModel.findOne({ owner: user._id });
-    update.updates.push({
-      type: "Game Start, Its Your turn",
-      data: room._id,
-      roomName: room.roomName,
-      createdAt: new Date(),
-    });
-    update.count += 1;
-    await update.save();
-    if (user.fireBaseToken) {
-      const message = {
-        notification: {
-          title: "Game Start",
-          body: "The story room has started! It's your turn to contribute.",
-        },
-        token: user.fireBaseToken,
-        data: {
-          type: "chat",
-          room: JSON.stringify(room),
-        },
-      };
-      await messaging.send(message);
-    }
   } else {
     res.status(400).json({
       success: false,
