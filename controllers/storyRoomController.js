@@ -547,16 +547,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
         room.currentTurn += 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       }
-      const user = await userModel.findById(room.currentUser);
-      const update = await updateModel.findOne({ owner: user._id });
-      update.updates.push({
-        type: "Game Start, Its Your turn",
-        data: room._id,
-        roomName: room.roomName,
-        createdAt: new Date(),
-      });
-      update.count += 1;
-      await update.save();
+      // const user = await userModel.findById(room.currentUser);
     }
     await room.save();
   } else {
@@ -571,6 +562,16 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Chat saved Succesfully",
   });
+
+  const update = await updateModel.findOne({ owner: room.currentUser });
+  update.updates.push({
+    type: "Game Start, Its Your turn",
+    data: room._id,
+    roomName: room.roomName,
+    createdAt: new Date(),
+  });
+  update.count += 1;
+  await update.save();
 
   if (user.fireBaseToken) {
     const message = {
@@ -630,16 +631,7 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
       room.chats[room.chats.length - 1].secondMessage = null;
     }
     await room.save();
-    const user = await userModel.findById(userId);
-    const update = await updateModel.findOne({ owner: user._id });
-    update.updates.push({
-      type: "skipped",
-      data: room._id,
-      roomName: room.roomName,
-      createdAt: new Date(),
-    });
-    update.count += 1;
-    await update.save();
+    // const user = await userModel.findById(userId);
   } else {
     return res.status(400).json({
       success: false,
@@ -652,6 +644,15 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Sequence Escaped Succesfully",
   });
+  const update = await updateModel.findOne({ owner: userId });
+  update.updates.push({
+    type: "skipped",
+    data: room._id,
+    roomName: room.roomName,
+    createdAt: new Date(),
+  });
+  update.count += 1;
+  await update.save();
   if (user.fireBaseToken) {
     const message = {
       notification: {
