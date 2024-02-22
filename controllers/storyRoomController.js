@@ -613,8 +613,9 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Room Not Found", 404));
   }
 
+  const userId = room.currentUser;
   if (room.status === "active" && room.host == req.userId) {
-    const userId = room.currentUser;
+    
     if (room.currentTurn == room.participants.length) {
       room.currentTurn = 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
