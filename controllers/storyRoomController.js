@@ -78,7 +78,13 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   const updatedNotifications = await Promise.all(notificationPromises);
   // console.log(updatedNotifications);
   if (userInvitations.length > 0) {
-    let userInvitations1 = userInvitations.map((email) => email.toLowerCase());
+    // let userInvitations1 = userInvitations.map((email) => email.toLowerCase());
+    let userInvitations1 = [];
+    for (let user of userInvitations) {
+      if (user.trim()) {
+        userInvitations1.push(user.toLowerCase());
+      }
+    }
     const invitations = userInvitations1.map((email) => {
       return invitationsModel.create({ userEmail: email, room: room._id });
     });
@@ -113,6 +119,14 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
   delete populatedRoom.chats;
   // console.log(fcmTokenArray);
+
+  res.status(201).send({
+    status: 201,
+    success: true,
+    data: populatedRoom,
+    message: "room Created Successfully",
+  });
+
   if (fcmTokenArray.length) {
     for (let token of fcmTokenArray) {
       const message = {
@@ -130,12 +144,6 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
 
     // await Promise.all(promise);
   }
-  res.status(201).send({
-    status: 201,
-    success: true,
-    data: populatedRoom,
-    message: "room Created Successfully",
-  });
 });
 
 exports.getRoomDetails = catchAsyncError(async (req, res, next) => {
@@ -469,6 +477,11 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
     }
   }
 
+  res.status(200).json({
+    status: 200,
+    message: "story completed",
+  });
+
   if (tokenArray.length) {
     if (tokenArray.length) {
       for (let token of tokenArray) {
@@ -487,11 +500,6 @@ exports.endStory = catchAsyncError(async (req, res, next) => {
       }
     }
   }
-
-  res.status(200).json({
-    status: 200,
-    message: "story completed",
-  });
 });
 
 exports.createChat = catchAsyncError(async (req, res, next) => {
@@ -549,24 +557,10 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       });
       update.count += 1;
       await update.save();
-      if (user.fireBaseToken) {
-        const message = {
-          notification: {
-            title: "Game Start",
-            body: "The story room has started! It's your turn to contribute.",
-          },
-          token: user.fireBaseToken,
-          data: {
-            type: "chat",
-            room: JSON.stringify(room),
-          },
-        };
-        await messaging.send(message);
-      }
     }
     await room.save();
   } else {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: "Story telling is not yet Started or Completed",
     });
@@ -577,6 +571,21 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Chat saved Succesfully",
   });
+
+  if (user.fireBaseToken) {
+    const message = {
+      notification: {
+        title: "Game Start",
+        body: "The story room has started! It's your turn to contribute.",
+      },
+      token: user.fireBaseToken,
+      data: {
+        type: "chat",
+        room: JSON.stringify(room),
+      },
+    };
+    await messaging.send(message);
+  }
 });
 
 exports.getChat = catchAsyncError(async (req, res, next) => {
