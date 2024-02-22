@@ -640,22 +640,8 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     });
     update.count += 1;
     await update.save();
-    if (user.fireBaseToken) {
-      const message = {
-        notification: {
-          title: "Participant Skipped",
-          body: "You've been skipped! It's okay, catch the next turn.",
-        },
-        token: user.fireBaseToken,
-        data: {
-          type: "chat",
-          room: JSON.stringify(room),
-        },
-      };
-      await messaging.send(message);
-    }
   } else {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: "You do not have Access",
     });
@@ -666,6 +652,20 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Sequence Escaped Succesfully",
   });
+  if (user.fireBaseToken) {
+    const message = {
+      notification: {
+        title: "Participant Skipped",
+        body: "You've been skipped! It's okay, catch the next turn.",
+      },
+      token: user.fireBaseToken,
+      data: {
+        type: "chat",
+        room: JSON.stringify(room),
+      },
+    };
+    await messaging.send(message);
+  }
 });
 
 exports.addParticipants = catchAsyncError(async (req, res, next) => {
@@ -703,6 +703,14 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
     );
   });
 
+  const updatedNotifications = await Promise.all(notificationPromises);
+
+  res.status(200).json({
+    status: 200,
+    message: "Participants added successfully",
+    success: true,
+    room,
+  });
   if (fcmTokenArray.length) {
     for (let token of fcmTokenArray) {
       const message = {
@@ -720,15 +728,6 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
 
     // await Promise.all(promise);
   }
-
-  const updatedNotifications = await Promise.all(notificationPromises);
-
-  res.status(200).json({
-    status: 200,
-    message: "Participants added successfully",
-    success: true,
-    room,
-  });
 });
 
 exports.removeParticipant = catchAsyncError(async (req, res, next) => {
