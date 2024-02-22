@@ -57,6 +57,26 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     genreId,
   });
 
+  // console.log(updatedNotifications);
+
+  // const genre = await genreModel.findOne({genre:theme});
+  const populatedRoom = await storyRoomModel
+    .findById(room._id)
+    .populate("host", "userName profileUrl")
+    .populate("genreId", "colour backgroundColour imageUrl")
+    .populate("participants._id", "userName profileUrl")
+    .lean();
+
+  delete populatedRoom.chats;
+  // console.log(fcmTokenArray);
+
+  res.status(201).send({
+    status: 201,
+    success: true,
+    data: populatedRoom,
+    message: "room Created Successfully",
+  });
+
   const notificationPromises = participants.slice(1).map((userId) => {
     return notificationsModel.findOneAndUpdate(
       { owner: userId },
@@ -76,7 +96,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   }
 
   const updatedNotifications = await Promise.all(notificationPromises);
-  // console.log(updatedNotifications);
+
   if (userInvitations.length > 0) {
     // let userInvitations1 = userInvitations.map((email) => email.toLowerCase());
     let userInvitations1 = [];
@@ -109,23 +129,6 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     };
     await sendInvitationEmail(options);
   }
-  // const genre = await genreModel.findOne({genre:theme});
-  const populatedRoom = await storyRoomModel
-    .findById(room._id)
-    .populate("host", "userName profileUrl")
-    .populate("genreId", "colour backgroundColour imageUrl")
-    .populate("participants._id", "userName profileUrl")
-    .lean();
-
-  delete populatedRoom.chats;
-  // console.log(fcmTokenArray);
-
-  res.status(201).send({
-    status: 201,
-    success: true,
-    data: populatedRoom,
-    message: "room Created Successfully",
-  });
 
   if (fcmTokenArray.length) {
     for (let token of fcmTokenArray) {
