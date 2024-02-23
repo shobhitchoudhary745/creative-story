@@ -636,7 +636,7 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
       room.chats[room.chats.length - 1].secondMessage = null;
     }
     await room.save();
-    // const user = await userModel.findById(userId);
+    // 
   } else {
     return res.status(400).json({
       success: false,
@@ -658,6 +658,7 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
   });
   update.count += 1;
   await update.save();
+  const user = await userModel.findById(userId);
   if (user.fireBaseToken) {
     const message = {
       notification: {
