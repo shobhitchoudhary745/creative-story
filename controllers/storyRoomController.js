@@ -692,7 +692,7 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
   const promise = participants.map((userId) => {
     return userModel.findById(userId);
   });
-  const users = Promise.all(promise);
+  const users = await Promise.all(promise);
   const fcmTokenArray = [];
   for (let user of users) {
     if (user.fireBaseToken) {
