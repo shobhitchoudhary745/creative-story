@@ -550,7 +550,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
         room.currentTurn += 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       }
-      // const user = await userModel.findById(room.currentUser);
+      // 
     }
     await room.save();
   } else {
@@ -575,6 +575,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
   });
   update.count += 1;
   await update.save();
+  const user = await userModel.findById(room.currentUser);
 
   if (user.fireBaseToken) {
     const message = {
