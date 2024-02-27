@@ -545,12 +545,17 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
         room.currentTurn = 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
         // room.currentRound < room.numberOfRounds ? (room.currentRound += 1) : "";
+        if (room.currentRound == room.numberOfRounds) {
+          room.status = "completed";
+        } else {
+          room.currentRound += 1;
+        }
         room.currentRound += 1;
       } else {
         room.currentTurn += 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
       }
-      // 
+      //
     }
     await room.save();
   } else {
@@ -616,7 +621,6 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
 
   const userId = room.currentUser;
   if (room.status === "active" && room.host == req.userId) {
-    
     if (room.currentTurn == room.participants.length) {
       room.currentTurn = 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
@@ -636,7 +640,7 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
       room.chats[room.chats.length - 1].secondMessage = null;
     }
     await room.save();
-    // 
+    //
   } else {
     return res.status(400).json({
       success: false,
