@@ -640,9 +640,11 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     if (room.currentTurn == room.participants.length) {
       room.currentTurn = 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
-      // if (room.currentRound < room.numberOfRounds) {
-      room.currentRound += 1;
-      // }
+      if (room.currentRound == room.numberOfRounds) {
+        room.status = "completed";
+      } else {
+        room.currentRound += 1;
+      }
     } else {
       room.currentTurn += 1;
       room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
