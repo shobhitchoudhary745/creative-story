@@ -84,6 +84,21 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
       { new: true }
     );
   });
+  const updatePromises = participants.slice(1).map((userId) => {
+    return updateModel.findOneAndUpdate(
+      { owner: userId },
+      {
+        $push: {
+          updates: {
+            type: "Invitation",
+            data: room._id,
+            roomName: room.roomName,
+          },
+        },
+      },
+      { new: true }
+    );
+  });
 
   const invitations = participants.slice(1).map((userId) => {
     return userModel.findById(userId);
@@ -96,7 +111,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
   }
 
   const updatedNotifications = await Promise.all(notificationPromises);
-
+  await Promise.all(updatePromises);
   if (userInvitations.length > 0) {
     // let userInvitations1 = userInvitations.map((email) => email.toLowerCase());
     let userInvitations1 = [];
