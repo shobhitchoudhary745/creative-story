@@ -93,6 +93,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
             type: "Invitation",
             data: room._id,
             roomName: room.roomName,
+            createdAt: new Date(),
           },
         },
       },
@@ -729,8 +730,25 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
     );
   });
 
-  const updatedNotifications = await Promise.all(notificationPromises);
+  const updatePromises = participants.map((userId) => {
+    return updateModel.findOneAndUpdate(
+      { owner: userId },
+      {
+        $push: {
+          updates: {
+            type: "Invitation",
+            data: room._id,
+            roomName: room.roomName,
+            createdAt: new Date(),
+          },
+        },
+      },
+      { new: true }
+    );
+  });
 
+  const updatedNotifications = await Promise.all(notificationPromises);
+  await Promise.all(updatePromises);
   res.status(200).json({
     status: 200,
     message: "Participants added successfully",
