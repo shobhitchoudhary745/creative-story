@@ -566,7 +566,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
         } else {
           room.currentRound += 1;
         }
-        room.currentRound += 1;
+        // room.currentRound += 1;
       } else {
         room.currentTurn += 1;
         room.currentUser = room.acceptedInvitation[room.currentTurn - 1];
