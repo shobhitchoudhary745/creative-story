@@ -138,7 +138,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
       </div>
   
       <div style="color: #888888;">
-        <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team String Geo</span></p>
+        <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team Creative Story</span></p>
       </div>
     
     </div>`,
