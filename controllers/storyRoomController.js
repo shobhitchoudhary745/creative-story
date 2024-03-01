@@ -445,6 +445,64 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
     status: 200,
     message: "story started",
   });
+
+
+
+  // if (room.status === "completed") {
+    const promise = room.participants.slice(1).map((userId) => {
+      return userModel.findById(userId);
+    });
+
+    const promise2 = room.participants.slice(1).map((userId) => {
+      return updateModel.findOneAndUpdate(
+        { owner: userId },
+        {
+          $push: {
+            updates: {
+              type: "Story is Started",
+              data: room._id,
+              roomName: room.roomName,
+              createdAt: new Date(),
+            },
+          },
+          $inc: { count: 1 },
+        }
+      );
+    });
+    await Promise.all(promise2);
+
+    const users = await Promise.all(promise);
+    const tokenArray = [];
+    for (let user of users) {
+      if (user.fireBaseToken) {
+        tokenArray.push(user.fireBaseToken);
+      }
+    }
+
+    if (tokenArray.length) {
+      if (tokenArray.length) {
+        for (let token of tokenArray) {
+          const message = {
+            notification: {
+              title: "Game start",
+              body: "The story game has Started.",
+            },
+            token,
+            data: {
+              type: "card",
+              room: JSON.stringify(room),
+            },
+          };
+          await messaging.send(message);
+        }
+      }
+    }
+  
+
+
+
+
+
 });
 
 exports.endStory = catchAsyncError(async (req, res, next) => {
