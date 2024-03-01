@@ -531,11 +531,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
   if (room.status === "active") {
     if (room.chats.length == 0) {
       room.chats.push({
-        sender: {
-          senderId: req.userId,
-          senderName: req.user.userName,
-          senderProfileUrl: req.user.profileUrl,
-        },
+        sender: req.userId,
         firstMessage: message,
         secondMessage: "",
       });
@@ -544,11 +540,7 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       room.chats[room.chats.length - 1].secondMessage == null
     ) {
       room.chats.push({
-        sender: {
-          senderId: req.userId,
-          senderName: req.user.userName,
-          senderProfileUrl: req.user.profileUrl,
-        },
+        sender: req.userId,
         firstMessage: message,
         secondMessage: "",
       });
@@ -613,6 +605,56 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
       },
     };
     await messaging.send(message);
+  }
+  if (room.status === "completed") {
+    const promise = room.participants.slice(1).map((userId) => {
+      return userModel.findById(userId);
+    });
+
+    const promise2 = room.participants.slice(1).map((userId) => {
+      return updateModel.findOneAndUpdate(
+        { owner: userId },
+        {
+          $push: {
+            updates: {
+              type: "Story Card is Ready",
+              data: room._id,
+              roomName: room.roomName,
+              createdAt: new Date(),
+            },
+          },
+          $inc: { count: 1 },
+        }
+      );
+    });
+    await Promise.all(promise2);
+
+    const users = await Promise.all(promise);
+    const tokenArray = [];
+    for (let user of users) {
+      if (user.fireBaseToken) {
+        tokenArray.push(user.fireBaseToken);
+      }
+    }
+
+    if (tokenArray.length) {
+      if (tokenArray.length) {
+        for (let token of tokenArray) {
+          const message = {
+            notification: {
+              title: "Game End",
+              body: "The story game has ended. Check out the completed story card!",
+            },
+            token,
+            data: {
+              type: "card",
+              room: JSON.stringify(room),
+            },
+          };
+          await messaging.send(message);
+        }
+      }
+    }
   }
 });
 
@@ -700,6 +742,57 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
     };
     await messaging.send(message);
   }
+
+  if (room.status === "completed") {
+    const promise = room.participants.slice(1).map((userId) => {
+      return userModel.findById(userId);
+    });
+
+    const promise2 = room.participants.slice(1).map((userId) => {
+      return updateModel.findOneAndUpdate(
+        { owner: userId },
+        {
+          $push: {
+            updates: {
+              type: "Story Card is Ready",
+              data: room._id,
+              roomName: room.roomName,
+              createdAt: new Date(),
+            },
+          },
+          $inc: { count: 1 },
+        }
+      );
+    });
+    await Promise.all(promise2);
+
+    const users = await Promise.all(promise);
+    const tokenArray = [];
+    for (let user of users) {
+      if (user.fireBaseToken) {
+        tokenArray.push(user.fireBaseToken);
+      }
+    }
+
+    if (tokenArray.length) {
+      if (tokenArray.length) {
+        for (let token of tokenArray) {
+          const message = {
+            notification: {
+              title: "Game End",
+              body: "The story game has ended. Check out the completed story card!",
+            },
+            token,
+            data: {
+              type: "card",
+              room: JSON.stringify(room),
+            },
+          };
+          await messaging.send(message);
+        }
+      }
+    }
+  }
 });
 
 exports.addParticipants = catchAsyncError(async (req, res, next) => {
@@ -713,8 +806,6 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
   if (req.userId != room.host) {
     return next(new ErrorHandler("you did not have authority", 401));
   }
-
-  console.log(participants);
 
   room.participants = [...room.participants, ...participants];
   await room.save();
@@ -823,6 +914,10 @@ exports.getGameDetails = catchAsyncError(async (req, res, next) => {
     .populate("genreId", "colour backgroundColour imageUrl")
     .populate("participants._id", "userName profileUrl")
     .populate("currentUser", "userName profileUrl")
+    .populate({
+      path: "chats.sender",
+      select: "userName profileUrl", // Select fields to populate
+    })
     .lean();
 
   res.status(200).send({

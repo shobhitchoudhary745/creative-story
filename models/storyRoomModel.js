@@ -50,20 +50,24 @@ const storyRoomSchema = new mongoose.Schema(
     },
     chats: [
       {
+        // sender: {
+        //   senderId: {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: "User",
+        //   },
+        //   senderName: {
+        //     type: String,
+        //   },
+        //   senderProfileUrl: {
+        //     type: String,
+        //   },
+        // },
         sender: {
-          senderId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-          },
-          senderName: {
-            type: String,
-          },
-          senderProfileUrl: {
-            type: String,
-          },
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
         },
         firstMessage: { type: String },
-        secondMessage: {type: String}
+        secondMessage: { type: String },
       },
     ],
     currentTurn: {
