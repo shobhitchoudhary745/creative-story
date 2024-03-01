@@ -178,7 +178,7 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
   }
 
   const options = {
-    email: email.toLowerCase(),
+    email: user.email.toLowerCase(),
     subject: "Account Deletion Confirmation",
     html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
 
