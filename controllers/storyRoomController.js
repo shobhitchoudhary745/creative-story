@@ -410,15 +410,15 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   const room = await storyRoomModel.findById(roomId);
 
   if (!room) {
-    res.status(400).json({ message: "Story not found" });
+    return res.status(400).json({ message: "Story not found" });
   }
-  // console.log(room.host, " ", req.userId);
+  
   if (room.host != req.userId) {
-    res.status(403).json({ message: "You do not have access" });
+    return res.status(403).json({ message: "You do not have access" });
   }
 
   if (room.status === "completed" || room.status === "active") {
-    res.status(401).json({ message: "Story already completed/ongoing" });
+    return res.status(401).json({ message: "Story already completed/ongoing" });
   }
 
   await invitationsModel.deleteMany({ room: roomId });
@@ -469,9 +469,10 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
         }
       );
     });
-    await Promise.all(promise2);
-
+    const updates = await Promise.all(promise2);
+    console.log(updates)
     const users = await Promise.all(promise);
+    console.log(users)
     const tokenArray = [];
     for (let user of users) {
       if (user.fireBaseToken) {
@@ -497,7 +498,9 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
         }
       }
     }
-  
+    
+
+    console.log(tokenArray)
 
 
 
