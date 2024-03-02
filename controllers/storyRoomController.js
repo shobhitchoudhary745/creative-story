@@ -412,7 +412,7 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   if (!room) {
     return res.status(400).json({ message: "Story not found" });
   }
-  
+
   if (room.host != req.userId) {
     return res.status(403).json({ message: "You do not have access" });
   }
@@ -446,66 +446,51 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
     message: "story started",
   });
 
+  const promise = room.participants.slice(1).map((userId) => {
+    return userModel.findById(userId._id);
+  });
 
-
-  // if (room.status === "completed") {
-    const promise = room.participants.slice(1).map((userId) => {
-      return userModel.findById(userId);
-    });
-
-    const promise2 = room.participants.slice(1).map((userId) => {
-      return updateModel.findOneAndUpdate(
-        { owner: userId },
-        {
-          $push: {
-            updates: {
-              type: "Story is Started",
-              data: room._id,
-              roomName: room.roomName,
-              createdAt: new Date(),
-            },
+  const promise2 = room.participants.slice(1).map((userId) => {
+    return updateModel.findOneAndUpdate(
+      { owner: userId._id },
+      {
+        $push: {
+          updates: {
+            type: "Story is Started",
+            data: room._id,
+            roomName: room.roomName,
+            createdAt: new Date(),
           },
-          $inc: { count: 1 },
-        }
-      );
-    });
-    const updates = await Promise.all(promise2);
-    console.log(updates)
-    const users = await Promise.all(promise);
-    console.log(users)
-    const tokenArray = [];
-    for (let user of users) {
-      if (user.fireBaseToken) {
-        tokenArray.push(user.fireBaseToken);
+        },
+        $inc: { count: 1 },
       }
+    );
+  });
+  await Promise.all(promise2);
+  const users = await Promise.all(promise);
+  const tokenArray = [];
+  for (let user of users) {
+    if (user.fireBaseToken) {
+      tokenArray.push(user.fireBaseToken);
     }
+  }
 
-    if (tokenArray.length) {
-      if (tokenArray.length) {
-        for (let token of tokenArray) {
-          const message = {
-            notification: {
-              title: "Game start",
-              body: "The story game has Started.",
-            },
-            token,
-            data: {
-              type: "card",
-              room: JSON.stringify(room),
-            },
-          };
-          await messaging.send(message);
-        }
-      }
+  if (tokenArray.length) {
+    for (let token of tokenArray) {
+      const message = {
+        notification: {
+          title: "Game start",
+          body: "The story game has Started.",
+        },
+        token,
+        data: {
+          type: "card",
+          room: JSON.stringify(room),
+        },
+      };
+      await messaging.send(message);
     }
-    
-
-    console.log(tokenArray)
-
-
-
-
-
+  }
 });
 
 exports.endStory = catchAsyncError(async (req, res, next) => {
