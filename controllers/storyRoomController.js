@@ -134,7 +134,6 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
         <h1 style="color: #333333;">Invitation</h1>
         <p style="color: #666666;">${req.user.userName} is Inviting You to join ${room.roomName}</p>
         <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">Join the adventure now</p>
-        <p style="color: #666666;">Use this code to Forgot your Password</p>
       </div>
   
       <div style="color: #888888;">
@@ -843,7 +842,7 @@ exports.escapeSequence = catchAsyncError(async (req, res, next) => {
 
 exports.addParticipants = catchAsyncError(async (req, res, next) => {
   const { roomId } = req.params;
-  const { participants } = req.body;
+  const { participants, userInvitations } = req.body;
   const room = await storyRoomModel.findById(roomId);
   if (!room) {
     return next(new ErrorHandler("Room Not Found", 404));
@@ -899,6 +898,41 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
     success: true,
     room,
   });
+
+  if (userInvitations.length > 0) {
+    let userInvitations1 = [];
+    for (let user of userInvitations) {
+      if (user.trim()) {
+        userInvitations1.push(user.toLowerCase());
+      }
+    }
+
+    if (userInvitations1.length) {
+      const invitations = userInvitations1.map((email) => {
+        return invitationsModel.create({ userEmail: email, room: room._id });
+      });
+      await Promise.all(invitations);
+      const options = {
+        email: userInvitations1,
+        subject: "Invitation to join Creative story",
+        html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
+
+      <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <h1 style="color: #333333;">Invitation</h1>
+        <p style="color: #666666;">${req.user.userName} is Inviting You to join ${room.roomName}</p>
+        <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">Join the adventure now</p>
+      </div>
+  
+      <div style="color: #888888;">
+        <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team Creative Story</span></p>
+      </div>
+    
+    </div>`,
+      };
+      await sendInvitationEmail(options);
+    }
+  }
+
   if (fcmTokenArray.length) {
     for (let token of fcmTokenArray) {
       const message = {
