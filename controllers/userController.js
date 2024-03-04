@@ -161,7 +161,7 @@ exports.login = catchAsyncError(async (req, res, next) => {
 exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
   await notificationsModel.findByIdAndDelete(id);
-  await storyRoomModel.deleteMany({ host: id });
+  await updatesModel.findByIdAndDelete(id);
   const user = await userModel.findByIdAndDelete(id).lean();
   if (user) {
     res.status(202).send({
@@ -170,7 +170,7 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
       success: true,
     });
   } else {
-    res.status(400).send({
+    return res.status(400).send({
       status: 400,
       message: "Some error occur",
       success: true,

@@ -9,6 +9,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const notificationsModel = require("../models/notificationsModel");
 const { s3Uploadv2 } = require("../utils/s3");
 const updateModel = require("../models/updateModel");
+const { sendEmail } = require("../utils/email");
 
 exports.termsandcondition = catchAsyncError(async (req, res, next) => {
   const termsBody = await termsAndConditionModel.find().lean();
@@ -348,4 +349,28 @@ exports.deleteAccount = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Account Deleted Successfully",
   });
+
+  const options = {
+    email: user.email.toLowerCase(),
+    subject: "Account Deletion Confirmation",
+    html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
+
+    <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+      <h1 style="color: #333333;"></h1>
+      <p style="color: #666666;">Dear ${
+        user.firstName + " " + user.lastName
+      }</p>
+      <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">Your account has been deleted successfully.</p>
+      <p style="color: #666666;">I hope to see you back soon.</p>
+    </div>
+
+    <div style="color: #888888;">
+      <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team Creative Story</span></p>
+    </div>
+  
+  </div>`,
+  };
+  await sendEmail(options);
+
+
 });
