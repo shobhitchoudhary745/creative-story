@@ -4,6 +4,7 @@ const storyRoomSchema = new mongoose.Schema(
   {
     roomName: {
       type: String,
+      unique:true,
       required: [true, "Please Enter RoomName"],
     },
     theme: {
