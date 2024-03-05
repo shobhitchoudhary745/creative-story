@@ -80,13 +80,19 @@ exports.register = catchAsyncError(async (req, res, next) => {
   if (existingUser) {
     return next(new ErrorHandler("This username is already exist", 400));
   }
-
+  let profileUrl =
+    "https://tse4.mm.bing.net/th?id=OIP.eXWcaYbEtO2uuexHM8sAwwHaHa&pid=Api&P=0&h=180";
   const min = 1000;
   const max = 9999;
   const otp = Math.floor(Math.random() * (max - min + 1)) + min;
+  if (gender == "Female") {
+    profileUrl =
+      "https://tse2.mm.bing.net/th?id=OIP.mWaZ5rZ6uzhHD8kk4HM2RwHaHa&pid=Api&P=0&h=180";
+  }
   const user = await userModel.create({
     firstName,
     lastName,
+    profileUrl,
     email,
     password,
     mobile_no,
