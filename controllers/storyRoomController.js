@@ -851,9 +851,11 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
   if (req.userId != room.host) {
     return next(new ErrorHandler("you did not have authority", 401));
   }
+  if (participants.length) {
+    room.participants = [...room.participants, ...participants];
+    await room.save();
+  }
 
-  room.participants = [...room.participants, ...participants];
-  await room.save();
   const promise = participants.map((userId) => {
     return userModel.findById(userId);
   });
