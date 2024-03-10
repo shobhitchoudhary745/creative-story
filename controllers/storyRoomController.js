@@ -1009,3 +1009,53 @@ exports.getGameDetails = catchAsyncError(async (req, res, next) => {
     message: "room Details",
   });
 });
+
+exports.addReaction = catchAsyncError(async (req, res, next) => {
+  const { roomId, messageId, type } = req.params;
+  const room = await storyRoomModel.findById(roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room not found"));
+  }
+
+  room.chats = room.chats.map((message) => {
+    if (message._id == messageId) {
+      message.reactions[type].user.push(req.userId);
+      message.reactions[type].count += 1;
+    }
+    return message;
+  });
+
+  await room.save();
+
+  res.status(200).send({
+    status: 200,
+    success: true,
+    message: "reaction added",
+  });
+});
+
+exports.removeReaction = catchAsyncError(async (req, res, next) => {
+  const { roomId, messageId, type } = req.params;
+  const room = await storyRoomModel.findById(roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room not found"));
+  }
+
+  room.chats = room.chats.map((message) => {
+    if (message._id == messageId) {
+      message.reactions[type].user = message.reactions[type].user.filter(
+        (id) => id != req.userId
+      );
+      message.reactions[type].count -= 1;
+    }
+    return message;
+  });
+
+  await room.save();
+
+  res.status(200).send({
+    status: 200,
+    success: true,
+    message: "reaction removed",
+  });
+});

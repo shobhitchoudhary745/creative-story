@@ -4,7 +4,7 @@ const storyRoomSchema = new mongoose.Schema(
   {
     roomName: {
       type: String,
-      unique:true,
+      unique: true,
       required: [true, "Please Enter RoomName"],
     },
     theme: {
@@ -51,6 +51,57 @@ const storyRoomSchema = new mongoose.Schema(
     },
     chats: [
       {
+        reactions: {
+          haha: {
+            count: {
+              type: Number,
+              default: 0,
+            },
+            user: [{ type: mongoose.Schema.Types.ObjectId }],
+          },
+          heart: {
+            count: {
+              type: Number,
+              default: 0,
+            },
+            user: [{ type: mongoose.Schema.Types.ObjectId }],
+          },
+          wow: {
+            count: {
+              type: Number,
+              default: 0,
+            },
+            user: [{ type: mongoose.Schema.Types.ObjectId }],
+          },
+          sad: {
+            count: {
+              type: Number,
+              default: 0,
+            },
+            user: [{ type: mongoose.Schema.Types.ObjectId }],
+          },
+          angry: {
+            count: {
+              type: Number,
+              default: 0,
+            },
+            user: [{ type: mongoose.Schema.Types.ObjectId }],
+          },
+          care: {
+            count: {
+              type: Number,
+              default: 0,
+            },
+            user: [{ type: mongoose.Schema.Types.ObjectId }],
+          },
+          like: {
+            count: {
+              type: Number,
+              default: 0,
+            },
+            user: [{ type: mongoose.Schema.Types.ObjectId }],
+          },
+        },
         // sender: {
         //   senderId: {
         //     type: mongoose.Schema.Types.ObjectId,
