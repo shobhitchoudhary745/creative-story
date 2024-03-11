@@ -1019,8 +1019,17 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
 
   room.chats = room.chats.map((message) => {
     if (message._id == messageId) {
-      message.reactions[type].user.push(req.userId);
-      message.reactions[type].count += 1;
+      let check = false;
+      for (let i = 0; i < message.reactions.length; ++i) {
+        if (message.reactions[i].type === type) {
+          message.reactions[i].count += 1;
+          message.reactions[i].user.push(req.userId);
+          check = true;
+        }
+      }
+      if (!check) {
+        message.reactions.push({ type, user: [req.userId], count: 1 });
+      }
     }
     return message;
   });
@@ -1043,10 +1052,14 @@ exports.removeReaction = catchAsyncError(async (req, res, next) => {
 
   room.chats = room.chats.map((message) => {
     if (message._id == messageId) {
-      message.reactions[type].user = message.reactions[type].user.filter(
-        (id) => id != req.userId
-      );
-      message.reactions[type].count -= 1;
+      for (let i = 0; i < message.reactions.length; ++i) {
+        if (message.reactions[i].type === type) {
+          message.reactions[i].count -= 1;
+          message.reactions[i].user = message.reactions[i].user.filter(
+            (id) => id != req.userId
+          );
+        }
+      }
     }
     return message;
   });
