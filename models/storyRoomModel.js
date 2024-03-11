@@ -54,13 +54,13 @@ const storyRoomSchema = new mongoose.Schema(
         reactions: [
           {
             type: {
-              String,
+              type: String,
             },
             count: {
               type: Number,
               default: 0,
             },
-            user: [{ type: mongoose.Schema.Types.ObjectId }],
+            user: { type: [{ type: mongoose.Schema.Types.ObjectId }] },
           },
         ],
 

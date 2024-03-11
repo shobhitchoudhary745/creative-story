@@ -1028,11 +1028,15 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
         }
       }
       if (!check) {
-        message.reactions.push({ type, user: [req.userId], count: 1 });
+        let arr = [req.userId];
+        // const obj = { type: type, count: 1, user: arr };
+        console.log(obj)
+        message.reactions.push(obj);
       }
     }
     return message;
   });
+  // console.log(room);
 
   await room.save();
 
