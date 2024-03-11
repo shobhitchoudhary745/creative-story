@@ -1029,8 +1029,8 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
       }
       if (!check) {
         let arr = [req.userId];
-        // const obj = { type: type, count: 1, user: arr };
-        console.log(obj)
+        const obj = { type: type, count: 1, user: arr };
+        // console.log(obj)
         message.reactions.push(obj);
       }
     }
