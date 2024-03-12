@@ -1017,15 +1017,22 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Room not found"));
   }
 
-  room.chats = room.chats.map((message) => {
-    if (message._id == messageId) {
-      let check = false;
-      for (let i = 0; i < message.reactions.length; ++i) {
-        if (message.reactions[i].user.includes(req.userId)) {
+  for (let i = 0; i < room.chats.length; ++i) {
+    if (room.chats[i]._id == messageId) {
+      for (let j = 0; j < room.chats[i].reactions.length; ++j) {
+        if (room.chats[i].reactions[j].user.includes(req.userId)) {
           return next(
             new ErrorHandler("You already reacted to this message", 400)
           );
         }
+      }
+    }
+  }
+
+  room.chats = room.chats.map((message) => {
+    if (message._id == messageId) {
+      let check = false;
+      for (let i = 0; i < message.reactions.length; ++i) {
         if (message.reactions[i].type === type) {
           message.reactions[i].count += 1;
           message.reactions[i].user.push(req.userId);
