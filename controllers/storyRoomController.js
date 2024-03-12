@@ -1021,9 +1021,10 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
     if (room.chats[i]._id == messageId) {
       for (let j = 0; j < room.chats[i].reactions.length; ++j) {
         if (room.chats[i].reactions[j].user.includes(req.userId)) {
-          return next(
-            new ErrorHandler("You already reacted to this message", 400)
-          );
+          room.chats[i].reactions[j].user = room.chats[i].reactions[
+            j
+          ].user.filter((id) => id != req.userId);
+          room.chats[i].reactions[j].count -= 1;
         }
       }
     }
@@ -1039,7 +1040,7 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
           check = true;
         }
       }
-      if (!check) {
+      if (!check && type != "remove") {
         let arr = [req.userId];
         const obj = { type: type, count: 1, user: arr };
         // console.log(obj)
