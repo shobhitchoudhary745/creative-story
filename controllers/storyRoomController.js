@@ -1025,6 +1025,9 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
             j
           ].user.filter((id) => id != req.userId);
           room.chats[i].reactions[j].count -= 1;
+          room.chats[i].reaction_list = room.chats[i].reaction_list.filter(
+            (id) => id != req.userId
+          );
         }
       }
     }
@@ -1038,6 +1041,7 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
           message.reactions[i].count += 1;
           message.reactions[i].user.push(req.userId);
           check = true;
+          message.reaction_list.push(req.userId);
         }
       }
       if (!check && type != "remove") {
@@ -1045,6 +1049,7 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
         const obj = { type: type, count: 1, user: arr };
         // console.log(obj)
         message.reactions.push(obj);
+        message.reaction_list.push(req.userId);
       }
     }
     return message;

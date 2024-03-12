@@ -63,6 +63,7 @@ const storyRoomSchema = new mongoose.Schema(
             user: { type: [{ type: mongoose.Schema.Types.ObjectId }] },
           },
         ],
+        reaction_list: [{ type: mongoose.Schema.Types.ObjectId }],
 
         sender: {
           type: mongoose.Schema.Types.ObjectId,
