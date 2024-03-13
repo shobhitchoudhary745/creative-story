@@ -1028,6 +1028,9 @@ exports.addReaction = catchAsyncError(async (req, res, next) => {
           room.chats[i].reaction_list = room.chats[i].reaction_list.filter(
             (id) => id != req.userId
           );
+          room.chats[i].reactions = room.chats[i].reactions.filter(
+            (reaction) => reaction.count != 0
+          );
         }
       }
     }
