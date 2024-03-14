@@ -182,6 +182,16 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
     ],
   });
   for (let room of rooms) {
+    if (room.status === "active" && room.currentUser == id) {
+      if (room.currentTurn == room.acceptedInvitation.length) {
+        room.currentTurn = 1;
+        room.currentUser = room.acceptedInvitation[0] || null;
+      } else {
+        room.currentTurn += 1;
+        room.currentUser =
+          room.acceptedInvitation[room.currentTurn - 1] || null;
+      }
+    }
     room.acceptedInvitation = room.acceptedInvitation.filter(
       (user) => user != id
     );
