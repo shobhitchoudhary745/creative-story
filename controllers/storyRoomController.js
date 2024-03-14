@@ -640,8 +640,8 @@ exports.createChat = catchAsyncError(async (req, res, next) => {
   if (user.fireBaseToken) {
     const message = {
       notification: {
-        title: "Game Start",
-        body: "The story room has started! It's your turn to contribute.",
+        title: "Reminder to Contribute",
+        body: "It's your turn! Add your part to the story now.",
       },
       token: user.fireBaseToken,
       data: {
