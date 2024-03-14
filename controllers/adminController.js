@@ -360,6 +360,13 @@ exports.deleteAccount = catchAsyncError(async (req, res, next) => {
       if (room.currentTurn == room.acceptedInvitation.length) {
         room.currentTurn = 1;
         room.currentUser = room.acceptedInvitation[0] || null;
+        if (room.currentRound == room.numberOfRounds) {
+          room.status = "completed";
+          room.currentUser = null;
+          room.currentRound = null;
+        } else {
+          room.currentRound += 1;
+        }
       } else {
         room.currentTurn += 1;
         room.currentUser =
