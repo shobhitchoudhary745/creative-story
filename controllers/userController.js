@@ -203,6 +203,9 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
       (user) => user != id
     );
     await room.save();
+    if (room.host == id && room.status == "active") {
+      await storyRoomModel.findByIdAndDelete(room._id);
+    }
   }
   const user = await userModel.findByIdAndDelete(id).lean();
   if (user) {
