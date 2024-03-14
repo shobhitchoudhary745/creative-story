@@ -168,6 +168,25 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const id = req.userId;
   await notificationsModel.findByIdAndDelete(id);
   await updatesModel.findByIdAndDelete(id);
+  const rooms = await storyRoomModel.find({
+    $or: [
+      { host: id },
+      {
+        participants: {
+          $elemMatch: {
+            _id: id,
+            invitationAccepted: true,
+          },
+        },
+      },
+    ],
+  });
+  for (let room of rooms) {
+    room.acceptedInvitation = room.acceptedInvitation.filter(
+      (user) => user != id
+    );
+    await room.save();
+  }
   const user = await userModel.findByIdAndDelete(id).lean();
   if (user) {
     res.status(202).send({

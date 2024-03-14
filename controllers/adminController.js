@@ -342,6 +342,25 @@ exports.deleteAccount = catchAsyncError(async (req, res, next) => {
   }
   const isPasswordMatched = await user.comparePassword(password);
   if (!isPasswordMatched) return next(new ErrorHandler("User Not Found", 400));
+  const rooms = await storyRoomModel.find({
+    $or: [
+      { host: user._id },
+      {
+        participants: {
+          $elemMatch: {
+            _id: user._id,
+            invitationAccepted: true,
+          },
+        },
+      },
+    ],
+  });
+  for (let room of rooms) {
+    room.acceptedInvitation = room.acceptedInvitation.filter(
+      (id) => id != user._id
+    );
+    await room.save();
+  }
   await userModel.findByIdAndDelete(user._id);
   await notificationsModel.findOneAndDelete({ owner: user._id });
   await updateModel.findOneAndDelete({ owner: user._id });
