@@ -229,9 +229,48 @@ exports.updateUser = catchAsyncError(async (req, res, next) => {
 
 exports.deleteUser = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
-  await notificationsModel.findByIdAndDelete(id);
-  await storyRoomModel.deleteMany({ host: id });
-  const user = await userModel.findByIdAndDelete(id);
+  const rooms = await storyRoomModel.find({
+    $or: [
+      { host: id },
+      {
+        participants: {
+          $elemMatch: {
+            _id: id,
+            invitationAccepted: true,
+          },
+        },
+      },
+    ],
+  });
+  for (let room of rooms) {
+    if (room.status === "active" && room.currentUser == id) {
+      if (room.currentTurn == room.acceptedInvitation.length) {
+        room.currentTurn = 1;
+        room.currentUser = room.acceptedInvitation[0] || null;
+        if (room.currentRound == room.numberOfRounds) {
+          room.status = "completed";
+          room.currentUser = null;
+          room.currentRound = null;
+        } else {
+          room.currentRound += 1;
+        }
+      } else {
+        room.currentTurn += 1;
+        room.currentUser =
+          room.acceptedInvitation[room.currentTurn - 1] || null;
+      }
+    }
+    room.acceptedInvitation = room.acceptedInvitation.filter(
+      (user) => user != id
+    );
+    await room.save();
+    if (room.host == id && room.status == "active") {
+      await storyRoomModel.findByIdAndDelete(room._id);
+    }
+  }
+  await userModel.findByIdAndDelete(id);
+  await notificationsModel.findOneAndDelete({ owner: id });
+  await updateModel.findOneAndDelete({ owner: id });
 
   res.status(200).send({
     success: true,
