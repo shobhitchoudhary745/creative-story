@@ -274,6 +274,7 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
 
   res.status(200).send({
     success: true,
+    rooms,
     message: "User Deleted Successfully!",
   });
 });
