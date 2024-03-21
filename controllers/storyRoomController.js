@@ -55,6 +55,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     numberOfRounds,
     acceptedInvitation,
     genreId,
+    email: userInvitations,
   });
 
   // console.log(updatedNotifications);
@@ -421,7 +422,7 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   }
 
   await invitationsModel.deleteMany({ room: roomId });
-
+  room.email = []
   room.status = "active";
   room.currentTurn = 1;
   room.currentRound = 1;
