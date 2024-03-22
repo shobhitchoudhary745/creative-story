@@ -852,8 +852,12 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
   if (req.userId != room.host) {
     return next(new ErrorHandler("you did not have authority", 401));
   }
-  if (participants.length) {
+  if (participants.length>0) {
     room.participants = [...room.participants, ...participants];
+    await room.save();
+  }
+  if(userInvitations.length>0){
+    room.email = [...room.email,...userInvitations];
     await room.save();
   }
 
