@@ -218,6 +218,10 @@ exports.acceptInvitation = catchAsyncError(async (req, res, next) => {
       }
     }
   }
+
+  roomDetails.email = roomDetails.email.filter(
+    (data) => data != req.user.email
+  );
   if (!check) {
     if (isAccept) {
       temp.push({ _id: req.userId, invitationAccepted: isAccept });
@@ -422,7 +426,7 @@ exports.startStory = catchAsyncError(async (req, res, next) => {
   }
 
   await invitationsModel.deleteMany({ room: roomId });
-  room.email = []
+  room.email = [];
   room.status = "active";
   room.currentTurn = 1;
   room.currentRound = 1;
@@ -852,12 +856,12 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
   if (req.userId != room.host) {
     return next(new ErrorHandler("you did not have authority", 401));
   }
-  if (participants.length>0) {
+  if (participants.length > 0) {
     room.participants = [...room.participants, ...participants];
     await room.save();
   }
-  if(userInvitations.length>0){
-    room.email = [...room.email,...userInvitations];
+  if (userInvitations.length > 0) {
+    room.email = [...room.email, ...userInvitations];
     await room.save();
   }
 
@@ -1100,5 +1104,37 @@ exports.removeReaction = catchAsyncError(async (req, res, next) => {
     status: 200,
     success: true,
     message: "reaction removed",
+  });
+});
+
+exports.removeParticipantViaEmail = catchAsyncError(async (req, res, next) => {
+  const { roomId } = req.params;
+  const { email } = req.params;
+  const room = await storyRoomModel.findById(roomId);
+  if (!room) {
+    return next(new ErrorHandler("Room Not Found", 404));
+  }
+
+  if (req.userId != room.host) {
+    return next(new ErrorHandler("you did not have authority", 401));
+  }
+
+  room.email = room.email.filter(
+    (data) => data != email
+  );
+
+  await room.save();
+
+  // const notification = await notificationsModel.findOneAndUpdate(
+  //   { owner: participant },
+  //   { $pull: { notifications: room._id } },
+  //   { new: true }
+  // );
+
+  res.status(200).json({
+    status: 200,
+    message: "Participants removed successfully",
+    success: true,
+    room,
   });
 });

@@ -18,6 +18,7 @@ const {
   getGameDetails,
   addReaction,
   removeReaction,
+  removeParticipantViaEmail,
 } = require("../controllers/storyRoomController");
 const { auth } = require("../middlewares/auth");
 const router = express.Router();
@@ -36,6 +37,11 @@ router.post("/send-message/:roomId", auth, createChat);
 router.get("/get-chats/:roomId", auth, getChat);
 router.patch("/add-participants/:roomId", auth, addParticipants);
 router.patch("/remove-participants/:roomId", auth, removeParticipant);
+router.patch(
+  "/remove-participants-email/:roomId/:email",
+  auth,
+  removeParticipantViaEmail
+);
 router.patch("/escape-sequence/:roomId", auth, escapeSequence);
 router.post("/push-notification", sendDummyToken);
 router.patch("/add-reaction/:roomId/:messageId/:type", auth, addReaction);
