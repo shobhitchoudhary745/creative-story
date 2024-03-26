@@ -42,6 +42,13 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     genreId,
   } = req.body;
 
+  const existingRoom = await storyRoomModel.findOne({
+    roomName,
+    host: req.userId,
+  });
+  if (existingRoom) {
+    return next(new ErrorHandler("Room name already exist",400));
+  }
   participants[0].invitationAccepted = true;
 
   let acceptedInvitation = [req.userId];
@@ -1119,9 +1126,7 @@ exports.removeParticipantViaEmail = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("you did not have authority", 401));
   }
 
-  room.email = room.email.filter(
-    (data) => data != email
-  );
+  room.email = room.email.filter((data) => data != email);
 
   await room.save();
 

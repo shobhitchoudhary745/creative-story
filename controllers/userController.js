@@ -322,6 +322,10 @@ exports.resetPassword = catchAsyncError(async (req, res, next) => {
       email,
     })
     .select("+password");
+  const isPasswordMatched = await user.comparePassword(password);
+  if (isPasswordMatched) {
+    return next(new ErrorHandler("New Password is same as Old Password", 400));
+  }
   // console.log(user);
   if (user && user.otp == 0) {
     user.password = password;
@@ -407,6 +411,10 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
     });
   }
   const user = await userModel.findById(id);
+  const isPasswordMatched = await user.comparePassword(password);
+  if (isPasswordMatched) {
+    return next(new ErrorHandler("New Password is same as Old Password",400));
+  }
   user.password = password;
   await user.save();
   res.status(202).send({
