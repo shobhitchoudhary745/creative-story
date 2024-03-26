@@ -410,7 +410,7 @@ exports.changePassword = catchAsyncError(async (req, res, next) => {
       message: "Password not match with Confirm password",
     });
   }
-  const user = await userModel.findById(id);
+  const user = await userModel.findById(id).select("+password");
   const isPasswordMatched = await user.comparePassword(password);
   if (isPasswordMatched) {
     return next(new ErrorHandler("New Password is same as Old Password",400));
