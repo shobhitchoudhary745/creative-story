@@ -47,7 +47,7 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
     host: req.userId,
   });
   if (existingRoom) {
-    return next(new ErrorHandler("Room name already exist",400));
+    return next(new ErrorHandler("Room name already exist", 400));
   }
   participants[0].invitationAccepted = true;
 
@@ -1129,6 +1129,7 @@ exports.removeParticipantViaEmail = catchAsyncError(async (req, res, next) => {
   room.email = room.email.filter((data) => data != email);
 
   await room.save();
+  await invitationsModel.findOneAndDelete({ userEmail: email, room: roomId });
 
   // const notification = await notificationsModel.findOneAndUpdate(
   //   { owner: participant },
