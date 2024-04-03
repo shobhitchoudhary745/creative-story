@@ -866,7 +866,7 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
   }
 
   if (req.userId != room.host) {
-    return next(new ErrorHandler("you did not have authority", 401));
+    return next(new ErrorHandler("You do not have Authority", 401));
   }
   if (participants.length > 0) {
     room.participants = [...room.participants, ...participants];
@@ -988,7 +988,7 @@ exports.removeParticipant = catchAsyncError(async (req, res, next) => {
   }
 
   if (req.userId != room.host) {
-    return next(new ErrorHandler("you did not have authority", 401));
+    return next(new ErrorHandler("You do not have Authority", 401));
   }
 
   room.participants = room.participants.filter(
@@ -1132,7 +1132,7 @@ exports.removeParticipantViaEmail = catchAsyncError(async (req, res, next) => {
   }
 
   if (req.userId != room.host) {
-    return next(new ErrorHandler("you did not have authority", 401));
+    return next(new ErrorHandler("You do not have Authority", 401));
   }
 
   room.email = room.email.filter((data) => data != email);

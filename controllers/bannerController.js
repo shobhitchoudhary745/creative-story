@@ -48,7 +48,7 @@ exports.getBanners = catchAsyncError(async (req, res, next) => {
 exports.deleteBanner = catchAsyncError(async (req, res, next) => {
   const banner = await bannerModel.findByIdAndDelete(req.params.id);
   if (!banner) {
-    return next(new ErrorHandler("banner not found", 404));
+    return next(new ErrorHandler("Banner not found", 404));
   }
   res.status(200).json({
     success: true,
@@ -72,7 +72,7 @@ exports.updateBanner = catchAsyncError(async (req, res, next) => {
   const banner = await bannerModel.findById(req.params.id);
   const { navigationUrl, clientName } = req.body;
   if (!banner) {
-    return next(new ErrorHandler("banner not found", 404));
+    return next(new ErrorHandler("Banner not found", 404));
   }
   let location = "";
   if (req.file) {

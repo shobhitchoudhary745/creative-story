@@ -98,15 +98,15 @@ exports.adminLogin = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
   const admin = await userModel.findOne({ email }).select("+password");
   if (!admin) {
-    return next(new ErrorHandler("Invalid credentials", 401));
+    return next(new ErrorHandler("Invalid Credentials", 401));
   }
   if (admin.type != "Admin") {
-    return next(new ErrorHandler("You Do not have access to this route", 429));
+    return next(new ErrorHandler("You Do not have access to this Route", 429));
   }
 
   const isMatch = await admin.comparePassword(password);
   if (!isMatch) {
-    return next(new ErrorHandler("Invalid credentials", 401));
+    return next(new ErrorHandler("Invalid Credentials", 401));
   }
   const token = await admin.getJWTToken();
   res.status(200).send({
@@ -120,7 +120,7 @@ exports.updateAdminProfile = catchAsyncError(async (req, res, next) => {
   const { firstName, lastName, mobile_no } = req.body;
   const admin = await userModel.findById(req.userId);
   if (!admin) {
-    return next(new ErrorHandler("Invalid credentials", 401));
+    return next(new ErrorHandler("Invalid Credentials", 401));
   }
   if (firstName) admin.firstName = firstName;
   if (lastName) admin.lastName = lastName;

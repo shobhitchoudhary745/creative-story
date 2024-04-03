@@ -68,17 +68,17 @@ exports.register = catchAsyncError(async (req, res, next) => {
   }
   if (firstName.length <= 3) {
     return next(
-      new ErrorHandler("first name must be of atleast 4 character", 400)
+      new ErrorHandler("First name must be of atleast 4 character", 400)
     );
   }
   if (lastName.length <= 3) {
     return next(
-      new ErrorHandler("last name must be of atleast 4 character", 400)
+      new ErrorHandler("Last name must be of atleast 4 character", 400)
     );
   }
   const existingUser = await userModel.findOne({ userName });
   if (existingUser) {
-    return next(new ErrorHandler("This username is already exist", 400));
+    return next(new ErrorHandler("This Username is already exist", 400));
   }
   let profileUrl =
     "https://tse4.mm.bing.net/th?id=OIP.eXWcaYbEtO2uuexHM8sAwwHaHa&pid=Api&P=0&h=180";
@@ -278,7 +278,7 @@ exports.getOtpToForgotPassword = catchAsyncError(async (req, res, next) => {
     user.otp = otp;
     await user.save();
     res.status(200).send({
-      message: "otp send Successfully",
+      message: "OTP Send Successfully",
       status: 200,
       success: true,
     });
@@ -379,7 +379,7 @@ exports.submitOtpForEmailVerification = catchAsyncError(
       res.status(400).send({
         status: 400,
         success: false,
-        message: "Invalid otp!",
+        message: "Invalid OTP!",
       });
     }
   }
