@@ -5,6 +5,7 @@ const invitationsModel = require("../models/invitationModel");
 const userModel = require("../models/userModel");
 const ErrorHandler = require("../utils/errorHandler");
 const { sendInvitationEmail } = require("../utils/email");
+const path = require("path");
 
 const { firebase } = require("../utils/firebase");
 const updateModel = require("../models/updateModel");
@@ -137,15 +138,19 @@ exports.createRoom = catchAsyncError(async (req, res, next) => {
       email: userInvitations1,
       subject: "Invitation to join Creative story",
       html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
-
+    
       <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-        <h1 style="color: #333333;">Invitation</h1>
-        <p style="color: #666666;">${req.user.userName} is Inviting You to join ${room.roomName}</p>
+      <img style="width: 300px;height: 300px;" src="https://creative-story.s3.amazonaws.com/uploads/1712128663746-logo.jpeg"/>
+      <h1 style="color: #333333;">Invitation</h1>
+        <p style="color: #666666;">${req.user.userName} is Inviting You to join ${
+        room.roomName
+      }</p>
+        <p style="color: black;fontSize: 20px;">An Interactive Storytelling Game.</p>
         <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">Join the adventure now</p>
       </div>
   
-      <div style="color: #888888;">
-        <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team Creative Story</span></p>
+      <div style="color: #888888;margin:20px">
+        <p style="margin: 20px;">Regards, <span style="color: #caa257;">Team Creative Story</span></p>
       </div>
     
     </div>`,
@@ -934,18 +939,22 @@ exports.addParticipants = catchAsyncError(async (req, res, next) => {
         email: userInvitations1,
         subject: "Invitation to join Creative story",
         html: `<div style="font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; margin-top: 15px; padding: 0;">
-
-      <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-        <h1 style="color: #333333;">Invitation</h1>
-        <p style="color: #666666;">${req.user.userName} is Inviting You to join ${room.roomName}</p>
-        <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">Join the adventure now</p>
-      </div>
-  
-      <div style="color: #888888;">
-        <p style="margin-bottom: 10px;">Regards, <span style="color: #caa257;">Team Creative Story</span></p>
-      </div>
     
-    </div>`,
+        <div style="max-width: 600px; margin: 30px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <img style="width: 300px;height: 300px;" src="https://creative-story.s3.amazonaws.com/uploads/1712128663746-logo.jpeg"/>
+        <h1 style="color: #333333;">Invitation</h1>
+          <p style="color: #666666;">${req.user.userName} is Inviting You to join ${
+          room.roomName
+        }</p>
+          <p style="color: black;fontSize: 20px;">An Interactive Storytelling Game.</p>
+          <p style="font-size: 24px; font-weight: bold; color: #009688; margin: 0;">Join the adventure now</p>
+        </div>
+    
+        <div style="color: #888888;margin:20px">
+          <p style="margin: 20px;">Regards, <span style="color: #caa257;">Team Creative Story</span></p>
+        </div>
+      
+      </div>`,
       };
       await sendInvitationEmail(options);
     }
